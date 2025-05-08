@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Removed font-family from body - handled by layout.tsx and tailwind.config */
+body {
+  /* font-family: 'Geist', sans-serif; */ /* Use Geist font for a modern feel */
+  @apply transition-colors duration-300; /* Add smooth color transition */
+}
+
+@layer base {
+  :root, html {
+     /* Base font size - can be overridden by inline style */
+    font-size: 16px; /* Default base size */
+
+    /* Light theme (Now used) */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 220 100% 60%; /* Brighter Blue for light */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
+    --secondary: 270 60% 90%; /* Lighter Purple */
+    --secondary-foreground: 270 60% 30%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 90 100% 45%; /* Slightly darker Green for contrast */
+    --accent-foreground: 90 80% 5%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%; /* Lighter border */
+    --input: 240 5.9% 90%; /* Lighter input */
+    --ring: 90 100% 45%; /* Electric Green for focus rings */
+    --chart-1: 220 70% 50%;
+    --chart-2: 270 80% 70%;
+    --chart-3: 190 80% 60%;
+    --chart-4: 300 75% 65%;
+    --chart-5: 60 90% 55%;
+    --radius: 0.5rem;
+    --sidebar-background: 240 4.8% 95.9%; /* Light sidebar */
+    --sidebar-foreground: 240 10% 3.9%;
+    --sidebar-primary: 220 100% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5.9% 90%;
+    --sidebar-accent-foreground: 240 10% 3.9%;
+    --sidebar-border: 240 5.9% 85%;
+    --sidebar-ring: 90 100% 45%;
+  }
+
+  .dark, html.dark {
+     /* Base font size - can be overridden by inline style */
+    font-size: 16px; /* Default base size */
+
+    /* Dark Galaxy Theme */
+    --background: 240 10% 3.9%; /* Deep Black/Dark Blue */
+    --foreground: 0 0% 98%; /* Light Gray/White */
+    --card: 240 5% 8%; /* Slightly lighter dark */
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 220 100% 70%; /* Neon Blue */
+    --primary-foreground: 220 20% 10%;
+    --secondary: 270 60% 50%; /* Purple */
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 90 100% 50%; /* Electric Green */
+    --accent-foreground: 90 80% 5%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 90 100% 50%; /* Electric Green for focus rings */
+    --chart-1: 220 100% 70%; /* Neon Blue */
+    --chart-2: 270 80% 70%; /* Purple */
+    --chart-3: 190 80% 60%; /* Cyan */
+    --chart-4: 300 75% 65%; /* Magenta */
+    --chart-5: 60 90% 55%;  /* Yellow */
+    --radius: 0.5rem;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 220 100% 70%; /* Neon Blue for sidebar primary */
+    --sidebar-primary-foreground: 220 20% 10%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 90 100% 50%; /* Electric Green for sidebar rings */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Apply base font size to body for inheritance, but allow override via html style */
+    font-size: 1rem; /* Use relative unit */
+    /* Add a subtle galaxy background */
+    /* background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url("https://picsum.photos/seed/galaxy/1920/1080"); */
+    /* background-size: cover; */
+    /* background-attachment: fixed; */
+  }
+}
+
+/* Simple glow effect for buttons */
+.glow-button {
+  @apply shadow-[0_0_10px_theme(colors.accent),0_0_20px_theme(colors.accent/70)];
+}
+
+/* Animation for floating elements (example) */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
