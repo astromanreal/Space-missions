@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Bot, Send, User, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { spaceMissionQuery, SpaceMissionQueryInput, SpaceMissionQueryOutput } from '@/ai/flows/space-mission-query';
-import { useToast } from '@/hooks/use-toast';
+import toast from 'react-hot-toast';
 
 interface Message {
   id: string;
@@ -30,7 +30,6 @@ export default function AIChatbot({ isOpen, setIsOpen }: AIChatbotProps) {
   const [isPending, startTransition] = useTransition();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
   const [hasGreeted, setHasGreeted] = useState(false); // Track if initial greeting happened
 
   // Handle closing the chat from the 'X' button
@@ -69,11 +68,7 @@ export default function AIChatbot({ isOpen, setIsOpen }: AIChatbotProps) {
         } else if (error.message?.includes('Mission') && error.message?.includes('not found')) {
              description = `Sorry, I couldn't find information about the mission mentioned.`;
         }
-        toast({
-          title: 'Error',
-          description: description,
-          variant: 'destructive',
-        });
+        toast.error(description);
         setMessages((prev) => prev.filter(msg => msg.id !== thinkingMessageId));
       }
     });

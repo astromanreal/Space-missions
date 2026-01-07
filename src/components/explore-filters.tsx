@@ -14,9 +14,10 @@ interface ExploreFiltersProps {
   statuses: string[];
   targets: string[]; // Should contain simplified target names
   years: number[];
+  types: string[]; // Add types prop
 }
 
-export default function ExploreFilters({ agencies, statuses, targets, years }: ExploreFiltersProps) {
+export default function ExploreFilters({ agencies, statuses, targets, years, types }: ExploreFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -27,17 +28,18 @@ export default function ExploreFilters({ agencies, statuses, targets, years }: E
   const [status, setStatus] = useState(searchParams.get('status') || 'all');
   const [target, setTarget] = useState(searchParams.get('target') || 'all');
   const [year, setYear] = useState(searchParams.get('year') || 'all');
+  const [missionType, setMissionType] = useState(searchParams.get('missionType') || 'all'); // Add state for mission type
 
-  // Determine if any filters are active (excluding q, filter, type which are handled differently)
-  const areSpecificFiltersActive = agency !== 'all' || status !== 'all' || target !== 'all' || year !== 'all';
+  // Determine if any filters are active
+  const areSpecificFiltersActive = agency !== 'all' || status !== 'all' || target !== 'all' || year !== 'all' || missionType !== 'all';
   const areAnyFiltersActive = areSpecificFiltersActive || searchQuery !== '';
 
   // Update URL when filters change
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
 
-    // Determine if any specific filter is active based on CURRENT state, not initial
-    const specificFilterIsBeingApplied = agency !== 'all' || status !== 'all' || target !== 'all' || year !== 'all';
+    // Determine if any specific filter is active based on CURRENT state
+    const specificFilterIsBeingApplied = agency !== 'all' || status !== 'all' || target !== 'all' || year !== 'all' || missionType !== 'all';
 
     // Update or remove specific params based on state
     if (searchQuery) params.set('q', searchQuery); else params.delete('q');
@@ -45,33 +47,28 @@ export default function ExploreFilters({ agencies, statuses, targets, years }: E
     if (status !== 'all') params.set('status', status); else params.delete('status');
     if (target !== 'all') params.set('target', target); else params.delete('target');
     if (year !== 'all') params.set('year', year); else params.delete('year');
+    if (missionType !== 'all') params.set('missionType', missionType); else params.delete('missionType'); // Handle mission type
 
-    // Handle general 'filter' and 'type' params
-    const existingGeneralFilter = searchParams.get('filter'); // From homepage (iconic, recent, future)
-    const existingTypeFilter = searchParams.get('type');     // From explore-by-type (orbiter, mars, etc.)
+    // Handle general 'filter' and 'type' params from other pages
+    const existingGeneralFilter = searchParams.get('filter');
+    const existingTypeFilter = searchParams.get('type');
 
-    // If a specific filter (agency, status, target, year) is being actively used via the dropdowns/search,
-    // remove the general 'filter' and the 'type' filter from the URL.
+    // If a specific filter is being applied via the dropdowns, remove general ones
     if (specificFilterIsBeingApplied) {
       params.delete('filter');
       params.delete('type');
     } else {
-       // Otherwise, preserve them if they existed initially (coming from homepage or explore-by-type links)
-       // This ensures clicking "Iconic" on homepage takes you to /explore?filter=iconic
-       // And clicking "Mars" on explore-by-type takes you to /explore?type=mars
-       if (existingGeneralFilter) params.set('filter', existingGeneralFilter); else params.delete('filter');
-       if (existingTypeFilter) params.set('type', existingTypeFilter); else params.delete('type');
+       // Otherwise, preserve them if they existed
+       if (existingGeneralFilter) params.set('filter', existingGeneralFilter);
+       if (existingTypeFilter) params.set('type', existingTypeFilter);
     }
 
-
-    // Use router.replace for smoother updates without adding to history stack for every keystroke/selection
      startTransition(() => {
-        // Only push the params if there are any, otherwise go to base path
         const queryString = params.toString();
         router.replace(queryString ? `/explore?${queryString}` : '/explore', { scroll: false });
      });
 
-  }, [searchQuery, agency, status, target, year, router, searchParams]);
+  }, [searchQuery, agency, status, target, year, missionType, router, searchParams]);
 
   const handleResetFilters = () => {
      startTransition(() => {
@@ -80,7 +77,7 @@ export default function ExploreFilters({ agencies, statuses, targets, years }: E
          setStatus('all');
          setTarget('all');
          setYear('all');
-        // Reset URL to just /explore, removing all query params
+         setMissionType('all'); // Reset mission type
         router.replace('/explore', { scroll: false });
      });
   };
@@ -88,9 +85,9 @@ export default function ExploreFilters({ agencies, statuses, targets, years }: E
 
   return (
     <Card className="p-4 mb-8 bg-card/80 backdrop-blur-sm border border-border/50">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4 items-end">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 items-end">
          {/* Search Input */}
-        <div className="relative col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-2"> {/* Adjusted span for xl */}
+        <div className="relative col-span-1 sm:col-span-2 lg:col-span-2">
           <label htmlFor="search-missions" className="block text-sm font-medium text-muted-foreground mb-1.5">Search</label>
           <Search className="absolute left-3 top-[calc(50%+5px)] transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <Input
@@ -135,6 +132,22 @@ export default function ExploreFilters({ agencies, statuses, targets, years }: E
               </SelectContent>
             </Select>
         </div>
+        
+        {/* Mission Type Select */}
+        <div className="col-span-1">
+            <label htmlFor="filter-type" className="block text-sm font-medium text-muted-foreground mb-1.5">Type</label>
+            <Select value={missionType} onValueChange={setMissionType} disabled={isPending}>
+              <SelectTrigger id="filter-type" className="w-full">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                {types.map((t) => (
+                  <SelectItem key={t} value={t.toLowerCase()}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+        </div>
 
         {/* Target Select */}
         <div className="col-span-1">
@@ -169,9 +182,9 @@ export default function ExploreFilters({ agencies, statuses, targets, years }: E
             </Select>
         </div>
 
-         {/* Reset Button - Conditionally Rendered */}
-         {areAnyFiltersActive && ( // Show reset if *any* filter is active (including search)
-           <div className="col-span-1 flex items-end"> {/* Aligns button vertically */}
+         {/* Reset Button */}
+         {areAnyFiltersActive && (
+           <div className="col-span-1 flex items-end">
              <Button
                variant="ghost"
                onClick={handleResetFilters}

@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/auth/:path*',
+        destination: 'https://missions-api.vercel.app/api/auth/:path*',
+      },
+    ]
+  },
   images: {
     remotePatterns: [
       {

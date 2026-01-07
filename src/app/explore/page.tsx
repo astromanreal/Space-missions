@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'; // Import hooks
 import MissionCard from '@/components/mission-card';
 import { getSpaceMissions, SpaceMission } from '@/services/space-missions';
 import ExploreFilters from '@/components/explore-filters'; // Import the filters component
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'; // Import CardHeader, CardContent, CardFooter
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'; // Import CardHeader, CardContent
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { missionTypeDetails } from '@/lib/mission-types'; // Import shared mission type details
@@ -31,11 +31,15 @@ export default function ExplorePage() {
   const [filteredMissions, setFilteredMissions] = useState<SpaceMission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // State for filter options (derived from missions)
+  // State for filter options (now using curated lists)
   const [uniqueAgencies, setUniqueAgencies] = useState<string[]>([]);
   const [uniqueStatuses, setUniqueStatuses] = useState<string[]>([]);
-  const [uniqueTargets, setUniqueTargets] = useState<string[]>([]);
   const [uniqueYears, setUniqueYears] = useState<number[]>([]);
+  
+  // Hardcoded curated lists for simplified filtering
+  const curatedTargets = ['Sun', 'Moon', 'Mars', 'Jupiter', 'Saturn', 'Venus', 'Pluto', 'Asteroid', 'Interstellar'];
+  const curatedTypes = ['Orbiter', 'Lander', 'Rover', 'Flyby', 'Telescope', 'Sample Return', 'Solar Observatory'];
+
 
   // State for page title/subtitle
    const [pageTitle, setPageTitle] = useState('Explore Space Missions');
@@ -53,7 +57,6 @@ export default function ExplorePage() {
        // Extract unique values for filters based on fetched missions
        setUniqueAgencies(Array.from(new Set(fetchedMissions.map(m => m.agency))).sort());
        setUniqueStatuses(Array.from(new Set(fetchedMissions.map(m => m.status))).sort());
-       setUniqueTargets(Array.from(new Set(fetchedMissions.map(m => m.target.split(/[,(/]/)[0].trim()))).sort());
        setUniqueYears(Array.from(new Set(fetchedMissions.map(m => m.launchYear))).sort((a, b) => b - a));
 
       setIsLoading(false);
@@ -68,11 +71,17 @@ export default function ExplorePage() {
     // Extract filter values from searchParams
     const searchQuery = searchParams.get('q') || undefined;
     const generalFilter = searchParams.get('filter') || undefined; // 'iconic', 'recent', 'future', 'active'
-    const typeFilter = searchParams.get('type') || undefined;     // 'orbiter', 'rover', 'mars', etc.
+    let typeFilter = searchParams.get('type') || undefined;     // 'orbiter', 'rover', 'mars', etc. (from any source)
     const agencyFilter = searchParams.get('agency') || undefined;
     const statusFilter = searchParams.get('status') || undefined;
     const targetFilter = searchParams.get('target') || undefined;
     const yearFilter = searchParams.get('year') || undefined;
+    const specificTypeFilter = searchParams.get('missionType') || undefined; // from the new dropdown
+
+    // If a specific type filter from the dropdown is chosen, it takes precedence
+    if (specificTypeFilter) {
+      typeFilter = specificTypeFilter;
+    }
 
     // Define which types are target-based vs function-based (using the imported details)
     const targetBasedTypes = Object.entries(missionTypeDetails)
@@ -80,10 +89,10 @@ export default function ExplorePage() {
           .map(([key, _]) => key);
 
     // Determine if any *specific* filter is active
-    const isSpecificFilterActive = !!(searchQuery || agencyFilter || statusFilter || targetFilter || yearFilter);
+    const isSpecificFilterActive = !!(searchQuery || agencyFilter || statusFilter || targetFilter || yearFilter || specificTypeFilter);
 
     // Determine if the page view originated from a 'type' or 'filter' link click
-    const currentIsTypeOrFilterView = (typeFilter || generalFilter) && !isSpecificFilterActive;
+    const currentIsTypeOrFilterView = (searchParams.get('type') || generalFilter) && !isSpecificFilterActive;
     setIsTypeOrFilterView(currentIsTypeOrFilterView); // Update state
 
     // Filter logic
@@ -115,6 +124,11 @@ export default function ExplorePage() {
            if (yearFilter && yearFilter !== 'all') {
               match = match && mission.launchYear.toString() === yearFilter;
            }
+            // Handle the new mission type filter
+           if (specificTypeFilter && specificTypeFilter !== 'all') {
+              match = match && missionTypeLower.includes(specificTypeFilter.toLowerCase());
+           }
+
       } else {
         if (generalFilter) {
             let generalMatch = false;
@@ -131,7 +145,8 @@ export default function ExplorePage() {
             match = match && generalMatch;
         }
 
-        if (typeFilter) {
+        // This handles the type filter from the 'Explore by Type' page
+        if (typeFilter && !specificTypeFilter) {
             const typeFilterClean = typeFilter.replace('-', ' ').toLowerCase();
             let typeMatch = false;
             if (targetBasedTypes.includes(typeFilterClean)) {
@@ -151,7 +166,8 @@ export default function ExplorePage() {
      // Determine Page Title and Subtitle based on filters
      let newTitle = 'Explore Space Missions';
      let newSubtitle = 'Discover the spacecraft and technologies humanity has sent to explore the cosmos.';
-     const currentFilterOrTypeSlug = typeFilter || generalFilter;
+     // Use the original `type` param for title, not the specific one from the filter dropdown
+     const currentFilterOrTypeSlug = searchParams.get('type') || generalFilter;
      if (currentIsTypeOrFilterView && currentFilterOrTypeSlug) {
        const details = missionTypeDetails[currentFilterOrTypeSlug] || homepageFilterDetails[currentFilterOrTypeSlug];
        if (details) {
@@ -183,7 +199,7 @@ export default function ExplorePage() {
                <Skeleton className="h-6 w-16 mb-1.5" />
                <Skeleton className="h-10 w-full" />
              </div>
-             {[...Array(4)].map((_, i) => (
+             {[...Array(5)].map((_, i) => ( // Updated to 5 for the new filter
                 <div key={i} className="col-span-1">
                     <Skeleton className="h-6 w-12 mb-1.5" />
                     <Skeleton className="h-10 w-full" />
@@ -199,7 +215,7 @@ export default function ExplorePage() {
                   <Skeleton className="h-6 w-3/4 mb-2" />
                   <Skeleton className="h-4 w-1/2" />
                 </CardHeader>
-                <CardContent className="p-4 space-y-3 flex-grow">
+                <CardContent className="p-4 pt-0 space-y-3 flex-grow">
                   <Skeleton className="h-4 w-full" />
                   {cardSize === 'large' && <Skeleton className="h-4 w-full" />}
                   {cardSize === 'large' && <Skeleton className="h-4 w-3/4" />}
@@ -225,8 +241,9 @@ export default function ExplorePage() {
         <ExploreFilters
           agencies={uniqueAgencies}
           statuses={uniqueStatuses}
-          targets={uniqueTargets}
+          targets={curatedTargets}
           years={uniqueYears}
+          types={curatedTypes}
         />
       )}
 

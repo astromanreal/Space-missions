@@ -1,52 +1,50 @@
-// Add 'use client' for Header component as it now uses state
+
 'use client';
 
 import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
-// No longer need GeistMono here if not used directly in layout
-// import { GeistMono } from 'geist/font/mono';
 import './globals.css';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from 'react-hot-toast';
 import Link from 'next/link';
-import { Rocket, User, Settings, Search, Telescope, Bot, Activity, Hourglass, Menu } from 'lucide-react'; // Added Menu icon
+import { Rocket, User, Settings, Compass, Milestone, Activity, Hourglass, Menu, LogIn, X, ChevronDown, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import AIChatbot from '@/components/ai-chatbot';
 import ThemeToggle from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
-import React, { useState, useEffect } from 'react'; // Import useEffect
-import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet'; // Import Sheet components & SheetTitle
-import { SettingsProvider } from '@/context/settings-context'; // Import SettingsProvider
+import React, { useState, useEffect } from 'react';
+import { SettingsProvider } from '@/context/settings-context';
+import { AuthProvider, useAuth } from '@/context/auth-context'; // Import AuthProvider and useAuth
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 
-// Metadata can still be exported from server components or here if needed globally
-// export const metadata: Metadata = {
-//   title: 'Cosmic Explorer',
-//   description:
-//     'All You Need to Know About the Technology Behind Space Exploration',
-// };
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [isChatOpen, setIsChatOpen] = useState(false); // Manage chatbot state here
+  const [isMounted, setIsMounted] = useState(false);
 
-   // Apply initial font size scale on mount (moved from settings page)
-   useEffect(() => {
-    let initialScale = 1; // Default
+  useEffect(() => {
+    setIsMounted(true);
+    let initialScale = 1;
     try {
       const storedValue = localStorage.getItem('fontSizeScale');
       if (storedValue) {
         const parsedValue = parseFloat(storedValue);
         if (!isNaN(parsedValue)) {
-          // Ensure scale is within reasonable bounds if needed
           initialScale = Math.max(0.8, Math.min(1.3, parsedValue));
         }
       }
     } catch (e) {
       console.warn("Could not access localStorage for initial font size.", e);
     }
-     // Apply the font size immediately. SettingsProvider will refine this.
     document.documentElement.style.fontSize = `${initialScale * 16}px`;
   }, []);
 
@@ -55,167 +53,197 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          `${GeistSans.variable} antialiased font-sans`, // Removed GeistMono variable
-          'min-h-screen bg-background text-foreground flex flex-col transition-colors duration-300' // Added transition
+          `${GeistSans.variable} antialiased font-sans`,
+          'min-h-screen bg-background text-foreground flex flex-col transition-colors duration-300'
         )}
       >
-       {/* Wrap content with SettingsProvider */}
-        <SettingsProvider>
-           {/* Pass chat state setters/getters to Header */}
-          <Header isChatOpen={isChatOpen} setIsChatOpen={setIsChatOpen} />
-          <main className="flex-grow container mx-auto px-4 py-8">{children}</main>
-          <Toaster />
-          {/* Pass chat state to AIChatbot */}
-          <AIChatbot isOpen={isChatOpen} setIsOpen={setIsChatOpen} />
-        </SettingsProvider>
+        <AuthProvider>
+          <SettingsProvider>
+              <div className="flex flex-col flex-1">
+                {isMounted && <Header />}
+                {isMounted && <main className="flex-grow container mx-auto px-4 py-8">{children}</main>}
+                {isMounted && <Footer />}
+              </div>
+              <Toaster position="bottom-right" />
+          </SettingsProvider>
+        </AuthProvider>
       </body>
     </html>
   );
 }
 
-// Header component now needs props for chat state
-function Header({ isChatOpen, setIsChatOpen }: { isChatOpen: boolean; setIsChatOpen: (open: boolean) => void }) {
+
+function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth(); // Use the auth context
+
+  const handleLogout = () => {
+    logout();
+    // No need to push to router here, context can handle it or UI will just update
+  };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-screen-2xl items-center mx-auto px-4">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
-          <Rocket className="h-6 w-6 text-primary" />
-          <span className="font-bold sm:inline-block text-lg">
-            Cosmic Explorer
-          </span>
-        </Link>
+    <>
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 max-w-screen-2xl items-center mx-auto px-4">
+          <Link href="/" className="mr-6 flex items-center space-x-2">
+            <Rocket className="h-6 w-6 text-primary" />
+            <span className="font-bold sm:inline-block text-lg">
+              Cosmic Explorer
+            </span>
+          </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-4 text-sm flex-grow">
-          <Link
-            href="/explore"
-            className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1"
-          >
-            <Search className="h-4 w-4" /> Explore Missions
-          </Link>
-          <Link
-            href="/explore-by-type"
-            className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1"
-          >
-            <Telescope className="h-4 w-4" /> Explore by Type
-          </Link>
-          <Link
-            href="/explore?filter=active"
-            className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1"
-          >
-            <Activity className="h-4 w-4" /> Active Missions
-          </Link>
-          <Link
-            href="/explore?filter=future"
-            className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1"
-          >
-            <Hourglass className="h-4 w-4" /> Future Missions
-          </Link>
-        </nav>
-
-        {/* Right-aligned icons (Desktop) */}
-        <div className="hidden md:flex items-center space-x-1 ml-auto">
-          <Button variant="ghost" size="icon" asChild className="text-foreground/60 hover:text-primary">
-            <Link href="/contact" aria-label="Contact">
-              <User className="h-5 w-5" />
+          <nav className="hidden md:flex items-center gap-6 text-sm flex-grow">
+            <Link href="/explore" className="transition-colors hover:text-primary text-foreground/80 flex items-center gap-1.5">
+              <Compass className="h-4 w-4" /> Explore
             </Link>
-          </Button>
 
-          <Button variant="ghost" size="icon" onClick={() => setIsChatOpen(!isChatOpen)} className="text-foreground/60 hover:text-primary" aria-label="Toggle AI Chatbot">
-            <Bot className="h-5 w-5" />
-          </Button>
+             <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                 <Button variant="ghost" className="transition-colors hover:text-primary text-foreground/80 flex items-center gap-1.5 px-0 hover:bg-transparent">
+                  Browse <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem asChild>
+                   <Link href="/explore-by-type" className="flex items-center gap-1.5 w-full">
+                     <Milestone className="h-4 w-4" /> Mission Types
+                   </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                   <Link href="/explore?filter=active" className="flex items-center gap-1.5 w-full">
+                     <Activity className="h-4 w-4" /> Active Missions
+                   </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                   <Link href="/explore?filter=future" className="flex items-center gap-1.5 w-full">
+                     <Hourglass className="h-4 w-4" /> Future Missions
+                   </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </nav>
 
-          <ThemeToggle />
-
-          <Button variant="ghost" size="icon" asChild className="text-foreground/60 hover:text-primary">
-            <Link href="/settings" aria-label="Settings">
-              <Settings className="h-5 w-5" />
-            </Link>
-          </Button>
-        </div>
-
-        {/* Mobile Navigation Trigger */}
-        <div className="ml-auto md:hidden">
-          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-foreground/60 hover:text-primary">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[280px] bg-background/95 backdrop-blur pt-10">
-              {/* Add visually hidden title for accessibility */}
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-              <nav className="flex flex-col gap-4 text-lg">
-                <SheetClose asChild>
-                  <Link
-                    href="/explore"
-                    className="flex items-center gap-2 p-2 rounded-md hover:bg-accent hover:text-accent-foreground"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Search className="h-5 w-5" /> Explore Missions
-                  </Link>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Link
-                    href="/explore-by-type"
-                    className="flex items-center gap-2 p-2 rounded-md hover:bg-accent hover:text-accent-foreground"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Telescope className="h-5 w-5" /> Explore by Type
-                  </Link>
-                </SheetClose>
-                 <SheetClose asChild>
-                   <Link
-                    href="/explore?filter=active"
-                    className="flex items-center gap-2 p-2 rounded-md hover:bg-accent hover:text-accent-foreground"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Activity className="h-5 w-5" /> Active Missions
-                  </Link>
-                 </SheetClose>
-                 <SheetClose asChild>
-                   <Link
-                    href="/explore?filter=future"
-                    className="flex items-center gap-2 p-2 rounded-md hover:bg-accent hover:text-accent-foreground"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Hourglass className="h-5 w-5" /> Future Missions
-                  </Link>
-                 </SheetClose>
-                <SheetClose asChild>
-                  <Link
-                    href="/contact"
-                    className="flex items-center gap-2 p-2 rounded-md hover:bg-accent hover:text-accent-foreground"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <User className="h-5 w-5" /> Contact
-                  </Link>
-                </SheetClose>
-                <SheetClose asChild>
-                   <Button variant="ghost" onClick={() => { setIsChatOpen(!isChatOpen); setIsMobileMenuOpen(false); }} className="flex items-center gap-2 p-2 justify-start text-lg font-normal hover:bg-accent hover:text-accent-foreground" aria-label="Toggle AI Chatbot">
-                     <Bot className="h-5 w-5" /> AI Assistant
+          <div className="flex items-center gap-2 ml-auto">
+              <div className="hidden md:flex items-center gap-2">
+                <ThemeToggle />
+                 {user ? (
+                   <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                           <Avatar className="h-8 w-8">
+                              <AvatarImage src={`https://api.dicebear.com/8.x/lorelei/svg?seed=${user.username}`} alt={user.username} />
+                              <AvatarFallback>{user.username?.charAt(0).toUpperCase()}</AvatarFallback>
+                           </Avatar>
+                         </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                         <DropdownMenuSeparator />
+                         <DropdownMenuItem asChild>
+                            <Link href="/profile">
+                               <User className="mr-2 h-4 w-4" />
+                               <span>Profile</span>
+                            </Link>
+                         </DropdownMenuItem>
+                         <DropdownMenuItem asChild>
+                            <Link href="/settings">
+                                <Settings className="mr-2 h-4 w-4" />
+                                <span>Settings</span>
+                            </Link>
+                         </DropdownMenuItem>
+                         <DropdownMenuSeparator />
+                         <DropdownMenuItem onClick={handleLogout}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Log out</span>
+                         </DropdownMenuItem>
+                      </DropdownMenuContent>
+                   </DropdownMenu>
+                 ) : (
+                   <Button asChild>
+                      <Link href="/login">Join</Link>
                    </Button>
-                 </SheetClose>
-                 <SheetClose asChild>
-                  <Link
-                    href="/settings"
-                    className="flex items-center gap-2 p-2 rounded-md hover:bg-accent hover:text-accent-foreground"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Settings className="h-5 w-5" /> Settings
-                  </Link>
-                 </SheetClose>
-                 <div className="mt-4 flex items-center justify-center">
-                    <ThemeToggle />
-                 </div>
-              </nav>
-            </SheetContent>
-          </Sheet>
+                 )}
+              </div>
+
+            <Button variant="ghost" size="icon" className="md:hidden text-foreground/80 hover:text-primary" onClick={() => setIsMobileMenuOpen(true)}>
+              <Menu className="h-6 w-6" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </div>
+        </div>
+      </header>
+      
+      {/* Full-screen Mobile Menu */}
+      <div className={cn(
+        "fixed inset-0 z-[100] bg-background/95 backdrop-blur-lg p-6 transition-all duration-300 ease-in-out md:hidden",
+        isMobileMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
+      )}>
+         <div className="flex justify-between items-center mb-10">
+            <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
+                <Rocket className="h-6 w-6 text-primary" />
+                <span className="font-bold text-lg">Cosmic Explorer</span>
+            </Link>
+            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
+                <X className="h-6 w-6" />
+                <span className="sr-only">Close menu</span>
+            </Button>
+         </div>
+         <nav className="flex flex-col gap-4">
+            {user ? (
+               <>
+                 <Link href="/profile" className="text-2xl font-semibold p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Avatar className="h-8 w-8">
+                       <AvatarImage src={`https://api.dicebear.com/8.x/lorelei/svg?seed=${user.username}`} alt={user.username} />
+                       <AvatarFallback>{user.username?.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    My Profile
+                 </Link>
+                 <Link href="/settings" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Settings className="h-5 w-5 text-accent" /> Settings
+                 </Link>
+               </>
+            ) : (
+              <Link href="/login" className="text-2xl font-semibold p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
+                  <LogIn className="h-6 w-6 text-primary" /> Join The Exploration
+              </Link>
+            )}
+            <Link href="/explore" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
+                <Compass className="h-5 w-5 text-accent" /> Explore All
+            </Link>
+             <Link href="/explore-by-type" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
+                <Milestone className="h-5 w-5 text-accent" /> Mission Types
+            </Link>
+             <Link href="/explore?filter=active" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
+                <Activity className="h-5 w-5 text-accent" /> Active Missions
+            </Link>
+             <Link href="/explore?filter=future" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
+                <Hourglass className="h-5 w-5 text-accent" /> Future Missions
+            </Link>
+            {user && (
+              <Button variant="destructive" className="mt-8" onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}>
+                 <LogOut className="mr-2 h-4 w-4" /> Logout
+              </Button>
+            )}
+         </nav>
+         <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center">
+            <div /> 
+            <ThemeToggle />
+         </div>
+      </div>
+    </>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="w-full border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex items-center justify-between h-16 max-w-screen-2xl mx-auto px-4 text-sm text-muted-foreground">
+        <p>&copy; {new Date().getFullYear()} Cosmic Explorer. All rights reserved.</p>
+        <div className="flex items-center gap-4">
+          <Link href="/contact" className="hover:text-primary transition-colors">Contact</Link>
         </div>
       </div>
-    </header>
+    </footer>
   );
 }

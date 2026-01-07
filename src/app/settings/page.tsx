@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, Text, Plus, Minus, RotateCcw, Image as ImageIcon, ImageOff, Square } from "lucide-react";
+import { Settings, Text, Plus, Minus, RotateCcw, Image as ImageIcon, ImageOff, Square, User, LogOut, ShieldAlert } from "lucide-react";
 import ThemeToggle from '@/components/theme-toggle'; // Reuse the existing toggle
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,9 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch"; // Import Switch
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"; // Import RadioGroup
 import { useSettings } from '@/context/settings-context'; // Import useSettings hook
+import { useAuth } from '@/context/auth-context'; // Import useAuth hook
 import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 const FONT_SIZE_STEP = 0.05;
 const MIN_FONT_SIZE_SCALE = 0.8; // 80%
@@ -18,6 +20,8 @@ const MAX_FONT_SIZE_SCALE = 1.3; // 130%
 const DEFAULT_FONT_SIZE_SCALE = 1;
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const { logout } = useAuth();
   // Use settings from context
   const {
     fontSizeScale,
@@ -30,11 +34,14 @@ export default function SettingsPage() {
 
   const [isMounted, setIsMounted] = useState(false);
 
-  // We still need isMounted to prevent hydration issues with client-side-only components/state
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  const handleLogout = () => {
+    logout();
+    // The logout function in the context will handle redirecting
+  };
 
   const adjustFontSize = (adjustment: number) => {
     setFontSizeScale(prev => {
@@ -47,7 +54,6 @@ export default function SettingsPage() {
     setFontSizeScale(DEFAULT_FONT_SIZE_SCALE);
   };
 
-  // Handlers for new settings
   const handleImageVisibilityChange = (checked: boolean) => {
     setShowCardImages(checked);
   };
@@ -65,7 +71,7 @@ export default function SettingsPage() {
             Settings
           </CardTitle>
           <CardDescription>
-            Manage your application preferences here.
+            Manage your application and account preferences here.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
@@ -81,7 +87,7 @@ export default function SettingsPage() {
                   Select the application theme.
                 </span>
               </Label>
-              {isMounted ? <ThemeToggle /> : <Button variant="ghost" size="icon" disabled className="h-10 w-10" />}
+              {isMounted ? <ThemeToggle /> : <Skeleton className="h-10 w-10" />}
             </div>
 
              {/* Card Image Visibility Setting */}
@@ -132,7 +138,6 @@ export default function SettingsPage() {
 
           </div>
 
-
           {/* Accessibility Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Accessibility</h3>
@@ -176,14 +181,38 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Other Settings Placeholder */}
-          {/* <div className="space-y-4">
-             <h3 className="text-lg font-medium">More Settings</h3>
-             <Separator />
-             <div className="p-6 border rounded-lg border-dashed border-border/70 text-center text-muted-foreground">
-                <p>More settings coming soon!</p>
-             </div>
-           </div> */}
+          {/* Account Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Account</h3>
+            <Separator />
+             <div className="rounded-lg border p-4 space-y-4">
+               <div className="flex items-center justify-between">
+                <Label className="flex flex-col space-y-1">
+                  <span>Log Out</span>
+                  <span className="font-normal leading-snug text-muted-foreground">
+                    End your current session.
+                  </span>
+                </Label>
+                <Button variant="outline" onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log Out
+                </Button>
+              </div>
+              <Separator />
+               <div className="flex items-center justify-between">
+                <Label className="flex flex-col space-y-1">
+                  <span className="text-destructive">Delete Account</span>
+                  <span className="font-normal leading-snug text-muted-foreground">
+                    Permanently delete your account and all associated data.
+                  </span>
+                </Label>
+                <Button variant="destructive" disabled>
+                    <ShieldAlert className="mr-2 h-4 w-4" />
+                    Delete Account
+                </Button>
+              </div>
+            </div>
+          </div>
 
         </CardContent>
       </Card>
@@ -191,7 +220,7 @@ export default function SettingsPage() {
   );
 }
 
-// Helper component for Skeleton needed for RadioGroup/Switch placeholder
+// Helper component for Skeleton needed for placeholders
 function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div

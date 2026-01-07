@@ -28,21 +28,17 @@ export default function Loading() {
 
       {/* Mimic Search/Filter */}
        <Card className="p-4 mb-8 bg-card/80 backdrop-blur-sm">
-           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4 items-end">
-             <div className="relative col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-2">
+           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 items-end">
+             <div className="relative col-span-1 sm:col-span-2 lg:col-span-2">
                <Skeleton className="h-6 w-16 mb-1.5" />
                <Skeleton className="h-10 w-full" />
              </div>
-             {[...Array(4)].map((_, i) => (
+             {[...Array(5)].map((_, i) => (
                 <div key={i} className="col-span-1">
                     <Skeleton className="h-6 w-12 mb-1.5" />
                     <Skeleton className="h-10 w-full" />
                 </div>
              ))}
-              {/* Placeholder for reset button if filters were active */}
-              {/* <div className="col-span-1 flex items-end">
-                 <Skeleton className="h-10 w-full" />
-              </div> */}
            </div>
          </Card>
 
