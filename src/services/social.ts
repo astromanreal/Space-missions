@@ -1,5 +1,4 @@
 
-
 /**
  * Represents a user profile in the social context of the app.
  */
@@ -29,6 +28,7 @@ export interface User {
     id: string;
     username: string;
     email: string;
+    bio?: string; // Add optional bio field
     createdAt: string;
     updatedAt: string;
 }

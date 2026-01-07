@@ -1,3 +1,4 @@
+
 import type { SpaceMission } from '@/services/space-missions';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -15,6 +16,7 @@ interface MissionCardProps {
 
 // Function to determine badge variant based on status
 const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+  if (!status) return 'outline';
   switch (status.toLowerCase()) {
     case 'active':
       return 'default'; // Use primary color (Neon Blue in dark theme)
@@ -29,33 +31,31 @@ const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructiv
 
 export default function MissionCard({ mission, cardSize, showImage }: MissionCardProps) {
   const {
-    name,
-    launchYear,
+    missionName,
+    launch,
     agency,
     missionType,
     status,
     target,
     objectives,
-    technologies,
-    findings,
-    image, 
+    image,
+    _id, // Use the actual ID for the link
   } = mission;
 
-  // Create a URL-friendly slug for the mission name
-  const missionSlug = name.toLowerCase().replace(/\s+/g, '-');
+  const launchYear = launch.launchDate ? new Date(launch.launchDate).getFullYear() : 'N/A';
+
 
   return (
     <Card className={cn(
         "flex flex-col overflow-hidden h-full transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-1 bg-card/80 backdrop-blur-sm border border-border/50",
-         // cardSize === 'small' ? 'text-xs' : '' // Example: adjust text size for small cards
     )}>
       <CardHeader className={cn("p-3", cardSize === 'small' ? 'pb-2' : 'p-4')}>
         {/* Conditionally render image based on showImage prop */}
-        {showImage && (
+        {showImage && image && (
           <div className="relative aspect-[4/3] w-full mb-3 rounded-md overflow-hidden">
             <Image
               src={image} // Use the direct image URL from mission data
-              alt={`Image of ${name} mission`}
+              alt={`Image of ${missionName} mission`}
               layout="fill"
               objectFit="cover"
               className="transition-transform duration-300 group-hover:scale-105"
@@ -70,8 +70,8 @@ export default function MissionCard({ mission, cardSize, showImage }: MissionCar
             </Badge>
           </div>
         )}
-        <CardTitle className={cn("font-semibold", cardSize === 'small' ? 'text-base' : 'text-xl')}>{name}</CardTitle>
-         <CardDescription className={cn("text-muted-foreground", cardSize === 'small' ? 'text-xs' : 'text-sm')}>{agency}</CardDescription>
+        <CardTitle className={cn("font-semibold", cardSize === 'small' ? 'text-base' : 'text-xl')}>{missionName}</CardTitle>
+         <CardDescription className={cn("text-muted-foreground", cardSize === 'small' ? 'text-xs' : 'text-sm')}>{agency.name}</CardDescription>
       </CardHeader>
 
        {/* Conditionally render detailed content for large cards */}
@@ -110,7 +110,7 @@ export default function MissionCard({ mission, cardSize, showImage }: MissionCar
 
 
       <CardFooter className={cn("border-t border-border/50", cardSize === 'small' ? 'p-2' : 'p-4')}>
-        <Link href={`/missions/${missionSlug}`} className="w-full">
+        <Link href={`/missions/${_id}`} className="w-full">
           <Button variant="outline" className={cn("w-full glow-on-hover border-primary/50 hover:bg-primary/10 hover:text-primary", cardSize === 'small' ? 'h-8 text-xs px-2' : 'h-10')}>
             View Details
           </Button>

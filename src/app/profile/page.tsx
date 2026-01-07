@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Cog, Loader2 } from "lucide-react";
+import { Cog, Loader2, Edit } from "lucide-react"; // Import Edit icon
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from '@/context/auth-context';
@@ -33,7 +33,7 @@ export default function ProfilePage() {
     // Mock data for display purposes, as these are not in the 'me' endpoint response
     const displayUser = {
         ...user,
-        bio: 'Space enthusiast and explorer. Following the stars, one mission at a time.',
+        bio: user.bio || 'Space enthusiast and explorer. Following the stars, one mission at a time.',
         bannerUrl: 'https://i.pinimg.com/736x/b8/45/ad/b845ada17bf21c3f8d38c587d09c4ddf.jpg',
         avatarUrl: `https://api.dicebear.com/8.x/lorelei/svg?seed=${user.username}`,
         followersCount: 0,
@@ -63,6 +63,9 @@ export default function ProfilePage() {
 
                 <CardHeader className="pt-20">
                     <div className="flex justify-end gap-2">
+                         <Button variant="outline" asChild>
+                            <Link href="/settings"><Edit className="mr-2 h-4 w-4" />Edit Profile</Link>
+                         </Button>
                          <Button variant="outline" asChild>
                             <Link href="/settings"><Cog className="mr-2 h-4 w-4" />Settings</Link>
                          </Button>

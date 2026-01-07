@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
@@ -12,6 +13,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   setToken: (token: string) => void;
+  updateUser: (user: User) => void; // Add updateUser to the context
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,6 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  // Load token from localStorage on initial mount
   useEffect(() => {
     let initialToken: string | null = null;
     try {
@@ -36,6 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+
+  // Fetch user profile whenever the token changes
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (token) {
@@ -62,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
           } else {
             const errorData = await response.json().catch(() => null);
-            console.error('Failed to fetch profile, logging out. Status:', response.status, errorData);
+            console.error('Failed to fetch profile, logging out. Status:', response.status, errorData ? errorData.error : 'No error data');
             logout();
           }
         } catch (error) {
@@ -72,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setIsLoading(false);
         }
       } else {
+        // No token, ensure user is null and clear storage
         setUser(null);
         try {
             localStorage.removeItem('authToken');
@@ -99,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (response.ok && data.token) {
             setTokenState(data.token);
-            // The useEffect will handle fetching the profile and redirecting
+            // The useEffect will handle fetching the profile and updating state
         } else {
             throw new Error(data.error || 'Login failed.');
         }
@@ -114,7 +120,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    toast.success("You have been logged out.");
     setTokenState(null);
     setUser(null);
      try {
@@ -123,8 +128,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch(e) {
         console.warn("could not remove item from localstorage")
     }
+    toast.success("You have been logged out.");
     router.push('/login');
   };
+
+  // Function to update user in context and localStorage
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+    try {
+        localStorage.setItem('userProfile', JSON.stringify(updatedUser));
+    } catch (e) {
+        console.warn("Could not save updated user profile to localStorage.", e);
+    }
+  }
 
   const value = {
     user,
@@ -133,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     setToken,
+    updateUser, // Expose the updateUser function
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

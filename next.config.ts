@@ -12,8 +12,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: '/api/auth/:path*',
-        destination: 'https://missions-api.vercel.app/api/auth/:path*',
+        source: '/api/v1/:path*',
+        destination: 'https://missions-api.vercel.app/api/v1/:path*',
       },
     ]
   },

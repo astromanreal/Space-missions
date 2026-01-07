@@ -13,80 +13,80 @@ body {
      /* Base font size - can be overridden by inline style */
     font-size: 16px; /* Default base size */
 
-    /* Light theme (Now used) */
+    /* Light theme (Updated) */
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 224 10% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 224 10% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 220 100% 60%; /* Brighter Blue for light */
+    --popover-foreground: 224 10% 10%;
+    --primary: 210 100% 50%; /* A classic, strong blue */
     --primary-foreground: 0 0% 100%; /* White text on primary */
-    --secondary: 270 60% 90%; /* Lighter Purple */
-    --secondary-foreground: 270 60% 30%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 90 100% 45%; /* Slightly darker Green for contrast */
-    --accent-foreground: 90 80% 5%;
+    --secondary: 220 15% 90%; /* Light cool gray */
+    --secondary-foreground: 220 15% 20%;
+    --muted: 220 15% 95%;
+    --muted-foreground: 220 10% 45%;
+    --accent: 190 95% 45%; /* A vibrant, modern cyan */
+    --accent-foreground: 190 90% 5%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%; /* Lighter border */
-    --input: 240 5.9% 90%; /* Lighter input */
-    --ring: 90 100% 45%; /* Electric Green for focus rings */
-    --chart-1: 220 70% 50%;
-    --chart-2: 270 80% 70%;
-    --chart-3: 190 80% 60%;
-    --chart-4: 300 75% 65%;
-    --chart-5: 60 90% 55%;
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 190 95% 45%; /* Cyan for focus rings */
+    --chart-1: 210 80% 55%;
+    --chart-2: 190 75% 50%;
+    --chart-3: 225 70% 60%;
+    --chart-4: 200 85% 65%;
+    --chart-5: 215 90% 70%;
     --radius: 0.5rem;
-    --sidebar-background: 240 4.8% 95.9%; /* Light sidebar */
-    --sidebar-foreground: 240 10% 3.9%;
-    --sidebar-primary: 220 100% 60%;
+    --sidebar-background: 220 15% 95.9%;
+    --sidebar-foreground: 224 10% 10%;
+    --sidebar-primary: 210 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 5.9% 90%;
-    --sidebar-accent-foreground: 240 10% 3.9%;
-    --sidebar-border: 240 5.9% 85%;
-    --sidebar-ring: 90 100% 45%;
+    --sidebar-accent: 220 15% 90%;
+    --sidebar-accent-foreground: 220 15% 20%;
+    --sidebar-border: 220 15% 85%;
+    --sidebar-ring: 190 95% 45%;
   }
 
   .dark, html.dark {
      /* Base font size - can be overridden by inline style */
     font-size: 16px; /* Default base size */
 
-    /* Dark Galaxy Theme */
-    --background: 240 10% 3.9%; /* Deep Black/Dark Blue */
-    --foreground: 0 0% 98%; /* Light Gray/White */
-    --card: 240 5% 8%; /* Slightly lighter dark */
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 220 100% 70%; /* Neon Blue */
-    --primary-foreground: 220 20% 10%;
-    --secondary: 270 60% 50%; /* Purple */
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 90 100% 50%; /* Electric Green */
-    --accent-foreground: 90 80% 5%;
+    /* Dark Modern Theme (Updated) */
+    --background: 220 15% 5%; /* Very dark, cool charcoal */
+    --foreground: 215 20% 90%; /* Soft off-white */
+    --card: 220 15% 10%; /* Slightly lighter cool dark */
+    --card-foreground: 215 20% 90%;
+    --popover: 220 15% 5%;
+    --popover-foreground: 215 20% 90%;
+    --primary: 210 100% 65%; /* A slightly brighter, deeper blue */
+    --primary-foreground: 210 20% 10%;
+    --secondary: 220 15% 25%; /* Muted cool blue/gray */
+    --secondary-foreground: 215 20% 90%;
+    --muted: 220 15% 15%;
+    --muted-foreground: 220 10% 65%;
+    --accent: 190 95% 50%; /* Futuristic Cyan */
+    --accent-foreground: 190 90% 5%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 90 100% 50%; /* Electric Green for focus rings */
-    --chart-1: 220 100% 70%; /* Neon Blue */
-    --chart-2: 270 80% 70%; /* Purple */
-    --chart-3: 190 80% 60%; /* Cyan */
-    --chart-4: 300 75% 65%; /* Magenta */
-    --chart-5: 60 90% 55%;  /* Yellow */
+    --border: 220 15% 15%;
+    --input: 220 15% 15%;
+    --ring: 190 95% 50%; /* Cyan for focus rings */
+    --chart-1: 210 90% 60%;
+    --chart-2: 190 85% 55%;
+    --chart-3: 225 75% 65%;
+    --chart-4: 200 90% 70%;
+    --chart-5: 215 95% 75%;
     --radius: 0.5rem;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 220 100% 70%; /* Neon Blue for sidebar primary */
-    --sidebar-primary-foreground: 220 20% 10%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 90 100% 50%; /* Electric Green for sidebar rings */
+    --sidebar-background: 220 15% 8%;
+    --sidebar-foreground: 215 20% 90%;
+    --sidebar-primary: 210 100% 65%;
+    --sidebar-primary-foreground: 210 20% 10%;
+    --sidebar-accent: 220 15% 15%;
+    --sidebar-accent-foreground: 215 20% 90%;
+    --sidebar-border: 220 15% 15%;
+    --sidebar-ring: 190 95% 50%;
   }
 }
 
