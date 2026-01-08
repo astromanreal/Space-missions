@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         source: '/api/v1/:path*',
         destination: 'https://missions-api.vercel.app/api/v1/:path*',
       },
+      {
+        source: '/api/auth/:path*',
+        destination: 'https://missions-api.vercel.app/api/auth/:path*',
+      },
     ]
   },
   images: {
