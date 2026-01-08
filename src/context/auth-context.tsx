@@ -5,21 +5,29 @@ import React, { createContext, useState, useContext, useEffect, ReactNode, useCa
 import { useRouter } from 'next/navigation';
 import { User } from '@/services/social';
 import toast from 'react-hot-toast';
+import { SpaceMission } from '@/services/space-missions';
+
+// Extend the User interface to include trackedMissions, which are now populated objects
+export interface UserWithTracking extends User {
+    trackedMissions?: SpaceMission[];
+}
+
+type UpdateUserAction = (prevUser: UserWithTracking | null) => UserWithTracking | null;
 
 interface AuthContextType {
-  user: User | null;
+  user: UserWithTracking | null;
   token: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   setToken: (token: string) => void;
-  updateUser: (user: User) => void; // Add updateUser to the context
+  updateUser: (action: UpdateUserAction) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserWithTracking | null>(null);
   const [token, setTokenState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
@@ -46,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (token) {
         setIsLoading(true);
         try {
+          // Use the local, proxied path
           const response = await fetch('/api/auth/me', {
             headers: { Authorization: `Bearer ${token}` },
           });
@@ -55,7 +64,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
              if (profileData && !profileData.error) {
                 setUser(profileData);
                 try {
-                  localStorage.setItem('userProfile', JSON.stringify(profileData));
                   localStorage.setItem('authToken', token);
                 } catch(e) {
                   console.warn("could not set item in localstorage")
@@ -81,7 +89,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         try {
             localStorage.removeItem('authToken');
-            localStorage.removeItem('userProfile');
         } catch(e) {
             console.warn("could not remove item from localstorage")
         }
@@ -124,7 +131,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
      try {
         localStorage.removeItem('authToken');
-        localStorage.removeItem('userProfile');
     } catch(e) {
         console.warn("could not remove item from localstorage")
     }
@@ -132,14 +138,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push('/login');
   };
 
-  // Function to update user in context and localStorage
-  const updateUser = (updatedUser: User) => {
-    setUser(updatedUser);
-    try {
-        localStorage.setItem('userProfile', JSON.stringify(updatedUser));
-    } catch (e) {
-        console.warn("Could not save updated user profile to localStorage.", e);
-    }
+  // Function to update user in context
+  const updateUser = (action: UpdateUserAction) => {
+    setUser(action);
   }
 
   const value = {
@@ -149,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     setToken,
-    updateUser, // Expose the updateUser function
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
