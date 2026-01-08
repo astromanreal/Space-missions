@@ -44,21 +44,8 @@ export interface SpaceMission {
   }
 }
 
-// Determine the base URL for API calls.
-// On the server, we need an absolute URL. On the client, relative is fine.
-const getBaseUrl = () => {
-  if (typeof window !== 'undefined') {
-    // Client-side, so use relative path
-    return '';
-  }
-  // Server-side, so construct absolute URL
-  const vc = process.env.NEXT_PUBLIC_VERCEL_URL;
-  const url = process.env.NEXT_PUBLIC_APP_URL;
-  if (vc) return `https://${vc}`;
-  return url || 'http://localhost:9002'; // Fallback for local development
-};
-
-const API_BASE_URL = `${getBaseUrl()}/api/v1`;
+// The external API base URL
+const EXTERNAL_API_BASE_URL = 'https://missions-api.vercel.app/api/v1';
 
 // Cache for missions to avoid repeated API calls
 let missionsCache: SpaceMission[] | null = null;
@@ -66,6 +53,8 @@ let missionsCache: SpaceMission[] | null = null;
 /**
  * Asynchronously retrieves a list of space missions from the API.
  * Uses a simple cache to avoid fetching the data more than once.
+ * This function ALWAYS fetches from the external API to ensure consistency
+ * across server, client, and build-time environments.
  *
  * @returns A promise that resolves to an array of SpaceMission objects.
  */
@@ -73,8 +62,12 @@ export async function getSpaceMissions(): Promise<SpaceMission[]> {
   if (missionsCache) {
     return missionsCache;
   }
+
+  // Always use the direct external API URL for reliability.
+  const fetchUrl = `${EXTERNAL_API_BASE_URL}/missions`;
+
   try {
-    const response = await fetch(`${API_BASE_URL}/missions`);
+    const response = await fetch(fetchUrl);
     if (!response.ok) {
       throw new Error(`Failed to fetch missions: ${response.statusText}`);
     }
@@ -93,32 +86,17 @@ export async function getSpaceMissions(): Promise<SpaceMission[]> {
 }
 
 /**
- * Asynchronously retrieves a single space mission by its slug (which is treated as an ID) from the API.
+ * Asynchronously retrieves a single space mission by its slug (which is treated as an ID).
+ * This function fetches all missions and finds the one with the matching slug.
  *
  * @param slug The URL-friendly slug (ID) of the mission.
 * @returns A promise that resolves to a SpaceMission object or null if not found.
  */
 export async function getSpaceMissionBySlug(slug: string): Promise<SpaceMission | null> {
-    try {
-        const response = await fetch(`${API_BASE_URL}/missions/${slug}`);
-        if (!response.ok) {
-            // If the response is not OK (e.g., 404), don't try to parse JSON.
-            // Just return null or throw a generic error.
-            if (response.status === 404) {
-                return null;
-            }
-            throw new Error(`Failed to fetch mission ${slug}: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        if (result.success) {
-          return result.data;
-        } else {
-          return null;
-        }
-    } catch (error) {
-        console.error(`Error fetching mission by slug ${slug}:`, error);
-        return null; // Return null on error
-    }
+    const allMissions = await getSpaceMissions();
+    const mission = allMissions.find(m => m._id === slug);
+    return mission || null;
 }
+
+
 

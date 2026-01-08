@@ -1,6 +1,5 @@
 
-
-import { getSpaceMissions } from '@/services/space-missions';
+import { getSpaceMissions, SpaceMission } from '@/services/space-missions';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +10,22 @@ import { Button } from '@/components/ui/button';
 import { ReactNode } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+
+// Pre-build all mission pages at build time for better performance
+export async function generateStaticParams() {
+  const missions = await getSpaceMissions();
+  return missions.map((mission) => ({
+    slug: mission._id,
+  }));
+}
+
+// Function to fetch data for a single mission
+async function getMission(slug: string): Promise<SpaceMission | null> {
+    const allMissions = await getSpaceMissions();
+    const mission = allMissions.find(m => m._id === slug);
+    return mission || null;
+}
+
 
 interface MissionDetailPageProps {
   params: {
@@ -52,9 +67,7 @@ function DetailItem({ icon, label, value, children, className }: DetailItemProps
 }
 
 export default async function MissionDetailPage({ params }: MissionDetailPageProps) {
-  // Fetch all missions and find the one with the matching slug (_id)
-  const missions = await getSpaceMissions();
-  const mission = missions.find(m => m._id === params.slug);
+  const mission = await getMission(params.slug);
 
   if (!mission) {
     notFound();
@@ -81,20 +94,18 @@ export default async function MissionDetailPage({ params }: MissionDetailPagePro
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       <article className="space-y-8">
-        {/* Header Section */}
         <header className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">{missionName}</h1>
             {status && <Badge variant={getStatusVariant(status)} className="text-lg px-4 py-1">{status}</Badge>}
           </div>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground text-base">
+           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground text-base">
             {agency?.name && <div className="flex items-center"><Users className="mr-1.5 h-4 w-4" /> {agency.name}</div>}
             {target && <div className="flex items-center"><Target className="mr-1.5 h-4 w-4" /> {target}</div>}
             {missionType && <div className="flex items-center"><Tag className="mr-1.5 h-4 w-4" /> {missionType}</div>}
           </div>
         </header>
 
-        {/* Image Section */}
         {image && (
           <div className="relative aspect-video w-full rounded-lg overflow-hidden shadow-lg">
             <Image
@@ -108,12 +119,9 @@ export default async function MissionDetailPage({ params }: MissionDetailPagePro
           </div>
         )}
 
-        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-12">
-            {/* Main Column */}
             <div className="lg:col-span-2 space-y-10">
                 
-                {/* Launch & Agency Info Section */}
                 <section>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                         <DetailItem icon={<Calendar />} label="Launch Date" value={launchDateFormatted} />
@@ -157,7 +165,6 @@ export default async function MissionDetailPage({ params }: MissionDetailPagePro
                 )}
             </div>
 
-            {/* Sidebar Column */}
             <aside className="space-y-6">
                  {technologies && technologies.length > 0 && (
                     <Card className="bg-card/80 backdrop-blur-sm">
@@ -193,7 +200,6 @@ export default async function MissionDetailPage({ params }: MissionDetailPagePro
             </aside>
         </div>
 
-        {/* Back Button */}
         <div className="mt-12 text-center">
            <Button variant="outline" asChild>
              <Link href="/explore">
@@ -206,3 +212,4 @@ export default async function MissionDetailPage({ params }: MissionDetailPagePro
   );
 }
 
+    
