@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,7 +10,7 @@ body {
 }
 
 @layer base {
-  :root, html {
+  :root, html.light.theme-galaxy, html:not(.dark).theme-galaxy {
      /* Base font size - can be overridden by inline style */
     font-size: 16px; /* Default base size */
 
@@ -49,7 +50,7 @@ body {
     --sidebar-ring: 190 95% 45%;
   }
 
-  .dark, html.dark {
+  html.dark.theme-galaxy {
      /* Base font size - can be overridden by inline style */
     font-size: 16px; /* Default base size */
 
@@ -88,6 +89,43 @@ body {
     --sidebar-border: 220 15% 15%;
     --sidebar-ring: 190 95% 50%;
   }
+
+  /* Nebula Theme */
+  html.light.theme-nebula, html:not(.dark).theme-nebula {
+    --primary: 260 90% 65%; /* Vibrant Purple */
+    --accent: 330 90% 60%; /* Bright Pink */
+    --ring: 330 90% 60%;
+  }
+  html.dark.theme-nebula {
+    --primary: 260 90% 70%; 
+    --accent: 330 90% 65%;
+    --ring: 330 90% 65%;
+  }
+
+  /* Solar Flare Theme */
+  html.light.theme-solar-flare, html:not(.dark).theme-solar-flare {
+    --primary: 35 100% 55%; /* Rich Orange */
+    --accent: 45 100% 50%; /* Golden Amber */
+    --ring: 45 100% 50%;
+  }
+  html.dark.theme-solar-flare {
+    --primary: 35 100% 65%;
+    --accent: 45 100% 60%;
+    --ring: 45 100% 60%;
+  }
+
+  /* Supernova Theme */
+  html.light.theme-supernova, html:not(.dark).theme-supernova {
+    --primary: 0 100% 55%; /* Bold Red */
+    --accent: 30 100% 60%; /* Vibrant Orange */
+    --ring: 30 100% 60%;
+  }
+  html.dark.theme-supernova {
+    --primary: 0 100% 65%;
+    --accent: 30 100% 70%;
+    --ring: 30 100% 70%;
+  }
+
 }
 
 @layer base {

@@ -13,9 +13,9 @@ export default function ProfileRedirectPage() {
     useEffect(() => {
         // Wait until the auth state is determined
         if (!isLoading) {
-            if (user?._id) {
-                // If user is logged in, redirect to their dynamic profile page
-                router.replace(`/profile/${user._id}`);
+            if (user?.username) {
+                // If user is logged in, redirect to their dynamic profile page using username
+                router.replace(`/profile/${user.username}`);
             } else {
                 // If no user is logged in, redirect to the login page
                 router.replace('/login');

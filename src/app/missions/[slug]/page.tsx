@@ -23,9 +23,16 @@ import { cn } from '@/lib/utils';
 const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
    if (!status) return 'outline';
    switch (status.toLowerCase()) {
-     case 'active': return 'default';
-     case 'completed': return 'secondary';
-     case 'planned': return 'outline';
+     case 'active':
+     case 'ongoing':
+        return 'default';
+     case 'completed':
+        return 'secondary';
+     case 'planned':
+     case 'upcoming':
+        return 'outline';
+     case 'failed':
+        return 'destructive';
      default: return 'outline';
    }
 };
@@ -316,7 +323,7 @@ export default function MissionDetailPage() {
                                     {trackedBy.map(trackingUser => (
                                         <Tooltip key={trackingUser._id}>
                                             <TooltipTrigger asChild>
-                                                <Link href={`/profile/${trackingUser._id}`}>
+                                                <Link href={`/profile/${trackingUser.username}`}>
                                                     <Avatar>
                                                         <AvatarImage src={`https://api.dicebear.com/8.x/lorelei/svg?seed=${trackingUser.username}`} alt={trackingUser.name} />
                                                         <AvatarFallback>{trackingUser.name?.charAt(0) || trackingUser.username?.charAt(0)}</AvatarFallback>

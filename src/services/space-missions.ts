@@ -8,6 +8,8 @@ export interface SpaceMission {
   _id: string;
   /** The name of the mission. */
   missionName: string;
+  /** A URL-friendly version of the mission name. */
+  slug: string;
   /** The type of mission. */
   missionType: string;
   /** The agency responsible for the mission. */
@@ -47,26 +49,19 @@ export interface SpaceMission {
   trackedBy?: User[];
 }
 
-// The external API base URL
-const EXTERNAL_API_BASE_URL = 'https://missions-api.vercel.app/api/v1';
+// The external API base URL is no longer needed here as requests will be proxied
+// const EXTERNAL_API_BASE_URL = 'https://missions-api.vercel.app/api/v1';
 
-// Cache for missions to avoid repeated API calls
-let missionsCache: SpaceMission[] | null = null;
 
 /**
  * Asynchronously retrieves a list of space missions from the API.
- * Uses a simple cache to avoid fetching the data more than once.
- * This function ALWAYS fetches from the external API to ensure consistency
- * across server, client, and build-time environments.
+ * This function now accepts a query string to support filtering, sorting, and pagination.
  *
+ * @param query A URL query string with parameters for filtering, sorting, etc.
  * @returns A promise that resolves to an array of SpaceMission objects.
  */
-export async function getSpaceMissions(): Promise<SpaceMission[]> {
-  if (missionsCache) {
-    return missionsCache;
-  }
-
-  const fetchUrl = `${EXTERNAL_API_BASE_URL}/missions`;
+export async function getSpaceMissions(query: string = ''): Promise<{ missions: SpaceMission[], count: number }> {
+  const fetchUrl = `/api/v1/missions?${query}`;
 
   try {
     const response = await fetch(fetchUrl);
@@ -75,15 +70,14 @@ export async function getSpaceMissions(): Promise<SpaceMission[]> {
     }
     const result = await response.json();
     if (result.success) {
-      missionsCache = result.data;
-      return result.data;
+      return { missions: result.data, count: result.count };
     } else {
       console.error("API returned an error:", result.msg);
-      return [];
+      return { missions: [], count: 0 };
     }
   } catch (error) {
     console.error("Error fetching space missions:", error);
-    return [];
+    return { missions: [], count: 0 };
   }
 }
 
@@ -95,7 +89,8 @@ export async function getSpaceMissions(): Promise<SpaceMission[]> {
  * @returns A promise that resolves to a SpaceMission object or null if not found.
  */
 export async function getSpaceMissionBySlug(slug: string): Promise<SpaceMission | null> {
-    const fetchUrl = `${EXTERNAL_API_BASE_URL}/missions/${slug}`;
+    // Use the proxied path
+    const fetchUrl = `/api/v1/missions/${slug}`;
 
     try {
         const response = await fetch(fetchUrl);

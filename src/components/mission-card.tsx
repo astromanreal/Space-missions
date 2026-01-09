@@ -19,11 +19,15 @@ const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructiv
   if (!status) return 'outline';
   switch (status.toLowerCase()) {
     case 'active':
+    case 'ongoing':
       return 'default'; // Use primary color (Neon Blue in dark theme)
     case 'completed':
       return 'secondary'; // Use secondary color (Purple in dark theme)
     case 'planned':
+    case 'upcoming':
       return 'outline';
+    case 'failed':
+        return 'destructive';
     default:
       return 'outline';
   }
@@ -39,7 +43,7 @@ export default function MissionCard({ mission, cardSize, showImage }: MissionCar
     target,
     objectives,
     image,
-    _id, // Use the actual ID for the link
+    slug, // Use the new slug for the link
   } = mission;
 
   const launchYear = launch.launchDate ? new Date(launch.launchDate).getFullYear() : 'N/A';
@@ -110,7 +114,7 @@ export default function MissionCard({ mission, cardSize, showImage }: MissionCar
 
 
       <CardFooter className={cn("border-t border-border/50", cardSize === 'small' ? 'p-2' : 'p-4')}>
-        <Link href={`/missions/${_id}`} className="w-full">
+        <Link href={`/missions/${slug}`} className="w-full">
           <Button variant="outline" className={cn("w-full glow-on-hover border-primary/50 hover:bg-primary/10 hover:text-primary", cardSize === 'small' ? 'h-8 text-xs px-2' : 'h-10')}>
             View Details
           </Button>

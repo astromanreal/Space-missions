@@ -1,73 +1,97 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Mail, Phone, Instagram, Twitter, Github } from "lucide-react"; // Use Twitter icon, Add Github icon
+import { Mail, Phone, Instagram, Twitter, Github } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+
+// Define an interface for the contact items for easier mapping
+interface ContactItemProps {
+  icon: React.ReactElement;
+  label: string;
+  value: string;
+  href: string;
+  isExternal?: boolean; // To handle target="_blank" for external links
+}
+
+const contactItems: ContactItemProps[] = [
+    {
+        icon: <Mail />,
+        label: "Email",
+        value: "Astroman6569@gmail.com",
+        href: "mailto:Astroman6569@gmail.com"
+    },
+    {
+        icon: <Phone />,
+        label: "Phone",
+        value: "+91 8102116569",
+        href: "tel:+918102116569"
+    },
+    {
+        icon: <Twitter />,
+        label: "X (Twitter)",
+        value: "@Sathyamsarthak",
+        href: "https://x.com/Sathyamsarthak",
+        isExternal: true
+    },
+    {
+        icon: <Instagram />,
+        label: "Instagram",
+        value: "@srishikharji",
+        href: "https://www.instagram.com/srishikharji/",
+        isExternal: true
+    },
+    {
+        icon: <Github />,
+        label: "GitHub",
+        value: "@astromanreal",
+        href: "https://github.com/astromanreal",
+        isExternal: true
+    }
+];
+
+function ContactLink({ icon, label, value, href, isExternal = false }: ContactItemProps) {
+    return (
+        <a 
+          href={href}
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noopener noreferrer" : undefined}
+          className="group flex items-center justify-between p-4 rounded-lg transition-colors duration-300 hover:bg-muted/50"
+        >
+            <div className="flex items-center gap-4">
+                <div className="text-primary group-hover:text-accent transition-colors">
+                    {icon}
+                </div>
+                <div>
+                    <h3 className="font-medium text-foreground/90">{label}</h3>
+                    <p className="text-sm text-accent group-hover:underline">{value}</p>
+                </div>
+            </div>
+            <div className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-1 group-hover:text-primary">
+                &rarr;
+            </div>
+        </a>
+    )
+}
 
 export default function ContactPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
-      <Card className="overflow-hidden shadow-lg bg-card/80 backdrop-blur-sm border border-border/50">
-        <CardHeader className="text-center pb-4">
-          <Avatar className="w-24 h-24 mx-auto mb-4 border-4 border-primary shadow-md">
-            {/* Placeholder image, replace with actual if available */}
-            <AvatarImage src="https://github.com/shadcn.png" alt="Sarthak Sri" data-ai-hint="profile picture" />
-            <AvatarFallback>SS</AvatarFallback>
+      <Card className="overflow-hidden shadow-xl bg-card/80 backdrop-blur-sm border-border/50">
+        <CardHeader className="p-6 text-center border-b border-border/50">
+          <Avatar className="w-28 h-28 mx-auto mb-4 border-4 border-primary shadow-lg">
+            <AvatarImage src="https://github.com/shadcn.png" alt="Sarthak Srivastava" data-ai-hint="profile picture" />
+            <AvatarFallback className="text-3xl">SS</AvatarFallback>
           </Avatar>
           <CardTitle className="text-3xl font-bold">Sarthak Srivastava</CardTitle>
-           <p className="text-muted-foreground">Space Enthusiast & Developer</p>
+          <CardDescription className="text-lg text-muted-foreground pt-1">
+            Space Enthusiast & Software Developer
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6 p-6 pt-2">
-          <h2 className="text-xl font-semibold text-center mb-6 border-b pb-2 border-border/50">Get in Touch</h2>
-
-          <div className="flex items-center space-x-4 p-3 rounded-md transition-colors hover:bg-muted/50">
-            <Mail className="h-6 w-6 text-primary flex-shrink-0" />
-            <div>
-              <h3 className="font-medium">Email</h3>
-              <a href="mailto:Astroman6569@gmail.com" className="text-accent hover:underline break-all">
-                Astroman6569@gmail.com
-              </a>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4 p-3 rounded-md transition-colors hover:bg-muted/50">
-            <Phone className="h-6 w-6 text-primary flex-shrink-0" />
-             <div>
-              <h3 className="font-medium">Phone</h3>
-              <a href="tel:+918102116569" className="text-accent hover:underline">
-                +91 8102116569
-              </a>
-             </div>
-          </div>
-
-           <div className="flex items-center space-x-4 p-3 rounded-md transition-colors hover:bg-muted/50">
-            <Twitter className="h-6 w-6 text-primary flex-shrink-0" />
-            <div>
-               <h3 className="font-medium">X (Twitter)</h3>
-              <Link href="https://x.com/Sathyamsarthak" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-                @Sathyamsarthak
-              </Link>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4 p-3 rounded-md transition-colors hover:bg-muted/50">
-            <Instagram className="h-6 w-6 text-primary flex-shrink-0" />
-             <div>
-              <h3 className="font-medium">Instagram</h3>
-              <Link href="https://www.instagram.com/srishikharji/" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-                @srishikharji
-              </Link>
-             </div>
-          </div>
-
-          <div className="flex items-center space-x-4 p-3 rounded-md transition-colors hover:bg-muted/50">
-            <Github className="h-6 w-6 text-primary flex-shrink-0" />
-            <div>
-              <h3 className="font-medium">GitHub</h3>
-              <Link href="https://github.com/astromanreal" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-                @astromanreal
-              </Link>
-            </div>
-          </div>
+        <CardContent className="p-4 space-y-2">
+            {contactItems.map(item => (
+                <ContactLink key={item.label} {...item} />
+            ))}
         </CardContent>
       </Card>
     </div>

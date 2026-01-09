@@ -1,12 +1,18 @@
+
 'use client';
 
 import React, { createContext, useState, useContext, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
+
+type Theme = 'light' | 'dark' | 'system';
+type ColorScheme = 'galaxy' | 'nebula' | 'solar-flare' | 'supernova';
 
 // Define the shape of the settings
 interface SettingsState {
   fontSizeScale: number;
   showCardImages: boolean;
   cardSize: 'small' | 'large';
+  theme: Theme;
+  colorScheme: ColorScheme;
 }
 
 // Define the shape of the context value
@@ -14,17 +20,25 @@ interface SettingsContextProps extends SettingsState {
   setFontSizeScale: Dispatch<SetStateAction<number>>;
   setShowCardImages: Dispatch<SetStateAction<boolean>>;
   setCardSize: Dispatch<SetStateAction<'small' | 'large'>>;
+  setTheme: Dispatch<SetStateAction<Theme>>;
+  setColorScheme: Dispatch<SetStateAction<ColorScheme>>;
 }
 
 // Local storage keys
 const FONT_SIZE_LS_KEY = 'fontSizeScale';
 const CARD_IMAGES_LS_KEY = 'showCardImages';
 const CARD_SIZE_LS_KEY = 'cardSize';
+const THEME_LS_KEY = 'theme';
+const COLOR_SCHEME_LS_KEY = 'colorScheme';
+
 
 // Default values
 const DEFAULT_FONT_SIZE_SCALE = 1;
-const DEFAULT_SHOW_CARD_IMAGES = true; // Set default to true
-const DEFAULT_CARD_SIZE = 'small'; // Set default to small
+const DEFAULT_SHOW_CARD_IMAGES = true;
+const DEFAULT_CARD_SIZE = 'small';
+const DEFAULT_THEME: Theme = 'dark';
+const DEFAULT_COLOR_SCHEME: ColorScheme = 'galaxy';
+
 
 // Create the context
 const SettingsContext = createContext<SettingsContextProps | undefined>(undefined);
@@ -34,85 +48,68 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [fontSizeScale, setFontSizeScale] = useState<number>(DEFAULT_FONT_SIZE_SCALE);
   const [showCardImages, setShowCardImages] = useState<boolean>(DEFAULT_SHOW_CARD_IMAGES);
   const [cardSize, setCardSize] = useState<'small' | 'large'>(DEFAULT_CARD_SIZE);
-  const [isMounted, setIsMounted] = useState(false); // Prevent hydration mismatch
+  const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
+  const [colorScheme, setColorScheme] = useState<ColorScheme>(DEFAULT_COLOR_SCHEME);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Load settings from local storage on mount
   useEffect(() => {
     setIsMounted(true);
-    let storedScale: number | null = null;
-    let storedShowImages: boolean | null = null;
-    let storedCardSize: 'small' | 'large' | null = null;
-
     try {
-      // Font Size
-      const scaleValue = localStorage.getItem(FONT_SIZE_LS_KEY);
-      if (scaleValue) {
-        const parsedScale = parseFloat(scaleValue);
-        if (!isNaN(parsedScale)) {
-          storedScale = Math.max(0.8, Math.min(1.3, parsedScale)); // Clamp value
-        }
+      const storedScale = localStorage.getItem(FONT_SIZE_LS_KEY);
+      if (storedScale) {
+        const parsedScale = parseFloat(storedScale);
+        if (!isNaN(parsedScale)) setFontSizeScale(Math.max(0.8, Math.min(1.3, parsedScale)));
       }
 
-      // Card Images
-      const imagesValue = localStorage.getItem(CARD_IMAGES_LS_KEY);
-      if (imagesValue !== null) {
-        storedShowImages = imagesValue === 'true';
-      }
+      const storedShowImages = localStorage.getItem(CARD_IMAGES_LS_KEY);
+      if (storedShowImages !== null) setShowCardImages(storedShowImages === 'true');
 
-      // Card Size
-      const sizeValue = localStorage.getItem(CARD_SIZE_LS_KEY);
-      if (sizeValue === 'small' || sizeValue === 'large') {
-        storedCardSize = sizeValue;
-      }
+      const storedCardSize = localStorage.getItem(CARD_SIZE_LS_KEY);
+      if (storedCardSize === 'small' || storedCardSize === 'large') setCardSize(storedCardSize);
+      
+      const storedTheme = localStorage.getItem(THEME_LS_KEY) as Theme | null;
+      if (storedTheme) setTheme(storedTheme);
+
+      const storedColorScheme = localStorage.getItem(COLOR_SCHEME_LS_KEY) as ColorScheme | null;
+      if (storedColorScheme) setColorScheme(storedColorScheme);
 
     } catch (e) {
       console.warn("Could not access localStorage for settings.", e);
     }
-
-    // Use defaults if nothing is stored
-    setFontSizeScale(storedScale ?? DEFAULT_FONT_SIZE_SCALE);
-    setShowCardImages(storedShowImages ?? DEFAULT_SHOW_CARD_IMAGES);
-    setCardSize(storedCardSize ?? DEFAULT_CARD_SIZE);
-
-     // Apply initial font size immediately after loading
-     const finalScale = storedScale ?? DEFAULT_FONT_SIZE_SCALE;
-     document.documentElement.style.fontSize = `${finalScale * 16}px`;
-
   }, []);
 
-  // Save font size changes to local storage and apply style
+  // Effect for font size
   useEffect(() => {
     if (isMounted) {
-      document.documentElement.style.fontSize = `${fontSizeScale * 16}px`; // Base 16px
-      try {
-        localStorage.setItem(FONT_SIZE_LS_KEY, fontSizeScale.toString());
-      } catch (e) {
-        console.warn("Could not save font size to localStorage.", e);
-      }
+      document.documentElement.style.fontSize = `${fontSizeScale * 16}px`;
+      localStorage.setItem(FONT_SIZE_LS_KEY, fontSizeScale.toString());
     }
   }, [fontSizeScale, isMounted]);
 
-  // Save card image visibility to local storage
+  // Effect for card images
   useEffect(() => {
-    if (isMounted) {
-      try {
-        localStorage.setItem(CARD_IMAGES_LS_KEY, showCardImages.toString());
-      } catch (e) {
-        console.warn("Could not save card image visibility to localStorage.", e);
-      }
-    }
+    if (isMounted) localStorage.setItem(CARD_IMAGES_LS_KEY, showCardImages.toString());
   }, [showCardImages, isMounted]);
 
-  // Save card size to local storage
+  // Effect for card size
+  useEffect(() => {
+    if (isMounted) localStorage.setItem(CARD_SIZE_LS_KEY, cardSize);
+  }, [cardSize, isMounted]);
+  
+  // Effect for theme (light/dark/system)
   useEffect(() => {
     if (isMounted) {
-      try {
-        localStorage.setItem(CARD_SIZE_LS_KEY, cardSize);
-      } catch (e) {
-        console.warn("Could not save card size to localStorage.", e);
-      }
+      localStorage.setItem(THEME_LS_KEY, theme);
     }
-  }, [cardSize, isMounted]);
+  }, [theme, isMounted]);
+
+  // Effect for color scheme
+  useEffect(() => {
+    if (isMounted) {
+      localStorage.setItem(COLOR_SCHEME_LS_KEY, colorScheme);
+    }
+  }, [colorScheme, isMounted]);
 
 
   const value = {
@@ -122,6 +119,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setShowCardImages,
     cardSize,
     setCardSize,
+    theme,
+    setTheme,
+    colorScheme,
+    setColorScheme,
   };
 
   return (

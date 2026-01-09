@@ -1,18 +1,16 @@
 
 'use client';
 
-import type { Metadata } from 'next';
+import React, { useState, useEffect } from 'react';
 import { GeistSans } from 'geist/font/sans';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import Link from 'next/link';
-import { Rocket, User, Settings, Compass, Milestone, Activity, Hourglass, Menu, LogIn, X, ChevronDown, LogOut } from 'lucide-react';
+import { Rocket, User, Settings, Compass, Milestone, Activity, Hourglass, Menu, LogIn, X, ChevronDown, LogOut, Github, Instagram } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import ThemeToggle from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
-import React, { useState, useEffect } from 'react';
-import { SettingsProvider } from '@/context/settings-context';
-import { AuthProvider, useAuth } from '@/context/auth-context'; // Import AuthProvider and useAuth
+import { SettingsProvider, useSettings } from '@/context/settings-context';
+import { AuthProvider, useAuth } from '@/context/auth-context';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -22,53 +20,83 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-
+import { Separator } from '@/components/ui/separator';
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-    let initialScale = 1;
-    try {
-      const storedValue = localStorage.getItem('fontSizeScale');
-      if (storedValue) {
-        const parsedValue = parseFloat(storedValue);
-        if (!isNaN(parsedValue)) {
-          initialScale = Math.max(0.8, Math.min(1.3, parsedValue));
-        }
-      }
-    } catch (e) {
-      console.warn("Could not access localStorage for initial font size.", e);
-    }
-    document.documentElement.style.fontSize = `${initialScale * 16}px`;
-  }, []);
-
-
+  
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={cn(
-          `${GeistSans.variable} antialiased font-sans`,
-          'min-h-screen bg-background text-foreground flex flex-col transition-colors duration-300'
-        )}
-      >
+      <body>
         <AuthProvider>
           <SettingsProvider>
-              <div className="flex flex-col flex-1">
-                {isMounted && <Header />}
-                {isMounted && <main className="flex-grow container mx-auto px-4 py-8">{children}</main>}
-                {isMounted && <Footer />}
-              </div>
-              <Toaster position="bottom-right" />
+            <AppBody>{children}</AppBody>
           </SettingsProvider>
         </AuthProvider>
       </body>
     </html>
+  );
+}
+
+
+function AppBody({ children }: { children: React.ReactNode }) {
+  const { theme, colorScheme } = useSettings();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+      const isDark =
+        theme === 'dark' ||
+        (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      
+      document.documentElement.classList.toggle('dark', isDark);
+      document.documentElement.className = `${isDark ? 'dark' : 'light'} theme-${colorScheme}`;
+    }
+  }, [theme, colorScheme, isMounted]);
+
+  // This effect handles system theme changes
+  useEffect(() => {
+    if (theme !== 'system' || !isMounted) return;
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+       const isDark = mediaQuery.matches;
+       document.documentElement.classList.toggle('dark', isDark);
+       document.documentElement.className = `${isDark ? 'dark' : 'light'} theme-${colorScheme}`;
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [theme, colorScheme, isMounted]);
+
+
+  return (
+    <div
+      className={cn(
+        `${GeistSans.variable} antialiased font-sans`,
+        'min-h-screen bg-background text-foreground flex flex-col'
+      )}
+    >
+        <div className="flex flex-col flex-1">
+          {isMounted ? (
+            <>
+              <Header />
+              <main className="flex-grow container mx-auto px-4 py-8">{children}</main>
+              <Footer />
+            </>
+          ) : (
+             <div className="flex-grow" /> // Render empty space to avoid layout shift while mounting
+          )}
+        </div>
+        <Toaster position="bottom-right" />
+    </div>
   );
 }
 
@@ -126,7 +154,6 @@ function Header() {
 
           <div className="flex items-center gap-2 ml-auto">
               <div className="hidden md:flex items-center gap-2">
-                <ThemeToggle />
                  {user ? (
                    <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -226,22 +253,34 @@ function Header() {
               </Button>
             )}
          </nav>
-         <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center">
-            <div /> 
-            <ThemeToggle />
-         </div>
       </div>
     </>
   );
 }
 
+
 function Footer() {
+  const contactLinks = [
+    { name: 'X (Twitter)', href: 'https://x.com/Sathyamsarthak', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg> },
+    { name: 'Instagram', href: 'https://www.instagram.com/srishikharji/', icon: <Instagram className="w-5 h-5" /> },
+    { name: 'GitHub', href: 'https://github.com/astromanreal', icon: <Github className="w-5 h-5" /> },
+  ];
+
   return (
     <footer className="w-full border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex items-center justify-between h-16 max-w-screen-2xl mx-auto px-4 text-sm text-muted-foreground">
+      <div className="container flex flex-col sm:flex-row items-center justify-between h-auto sm:h-20 max-w-screen-2xl mx-auto px-4 py-4 sm:py-0 text-sm text-muted-foreground gap-4">
         <p>&copy; {new Date().getFullYear()} Cosmic Explorer. All rights reserved.</p>
         <div className="flex items-center gap-4">
           <Link href="/contact" className="hover:text-primary transition-colors">Contact</Link>
+           <Separator orientation="vertical" className="h-4" />
+           <div className="flex items-center gap-3">
+             {contactLinks.map(link => (
+                <a key={link.name} href={link.href} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                  {link.icon}
+                  <span className="sr-only">{link.name}</span>
+                </a>
+             ))}
+           </div>
         </div>
       </div>
     </footer>

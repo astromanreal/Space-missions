@@ -10,6 +10,8 @@ import { SpaceMission } from '@/services/space-missions';
 // Extend the User interface to include trackedMissions, which are now populated objects
 export interface UserWithTracking extends User {
     trackedMissions?: SpaceMission[];
+    followers?: Partial<User>[];
+    following?: Partial<User>[];
 }
 
 type UpdateUserAction = (prevUser: UserWithTracking | null) => UserWithTracking | null;
@@ -74,8 +76,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                  logout();
               }
           } else {
-            const errorData = await response.json().catch(() => null);
-            console.error('Failed to fetch profile, logging out. Status:', response.status, errorData ? errorData.error : 'No error data');
+            // If the token is invalid (401), just log out silently.
+            // For other errors, log them.
+            if (response.status !== 401) {
+              const errorData = await response.json().catch(() => null);
+              console.error('Failed to fetch profile, logging out. Status:', response.status, errorData ? errorData.error : 'No error data');
+            }
             logout();
           }
         } catch (error) {

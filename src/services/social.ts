@@ -13,4 +13,6 @@ export interface User {
     createdAt: string;
     updatedAt: string;
     trackedMissions?: Partial<SpaceMission>[]; // Missions can be partial for summary views
+    followers?: Partial<User>[];
+    following?: Partial<User>[];
 }
