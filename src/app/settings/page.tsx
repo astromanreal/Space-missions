@@ -22,13 +22,14 @@ export default function SettingsPage() {
   const { user, token, logout, updateUser } = useAuth();
   const { theme, setTheme, colorScheme, setColorScheme } = useSettings();
   
-  const [formData, setFormData] = useState({ username: '', bio: '' });
+  const [formData, setFormData] = useState({ name: '', username: '', bio: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   useEffect(() => {
     if (user) {
       setFormData({
+        name: user.name || '',
         username: user.username,
         bio: user.bio || '',
       });
@@ -42,6 +43,7 @@ export default function SettingsPage() {
   const cancelEdit = () => {
       if (user) {
           setFormData({
+            name: user.name || '',
             username: user.username,
             bio: user.bio || '',
           });
@@ -136,6 +138,17 @@ export default function SettingsPage() {
             {isEditingProfile ? (
                  <form onSubmit={handleFormSubmit} className="space-y-4">
                      <div className="space-y-2">
+                         <Label htmlFor="name">Name</Label>
+                         <Input
+                           id="name"
+                           name="name"
+                           placeholder="Your public display name"
+                           value={formData.name}
+                           onChange={handleInputChange}
+                           disabled={isSubmitting}
+                         />
+                     </div>
+                     <div className="space-y-2">
                          <Label htmlFor="username">Username</Label>
                          <Input
                            id="username"
@@ -167,6 +180,10 @@ export default function SettingsPage() {
                  </form>
             ) : (
               <div className="space-y-4">
+                <div>
+                   <Label>Name</Label>
+                   <p className="text-muted-foreground">{user?.name || 'No name set yet.'}</p>
+                 </div>
                 <div>
                    <Label>Username</Label>
                    <p className="text-muted-foreground">{user?.username}</p>

@@ -1,4 +1,5 @@
 
+
 import { User } from "./social";
 
 /**
@@ -26,6 +27,8 @@ export interface SpaceMission {
   };
   /** The target of the mission (e.g., Mars, Moon, Sun). */
   target: string;
+    /** The destination of the mission. */
+  destination?: string;
   /** The status of the mission (e.g., Active, Completed, Planned). */
   status: string;
   /** The objectives of the mission. */
@@ -47,6 +50,47 @@ export interface SpaceMission {
   };
   /** Array of users tracking this mission (optional). */
   trackedBy?: User[];
+  /** Mission timeline details */
+  missionTimeline?: {
+    startDate?: string;
+    endDate?: string;
+  };
+  /** Spacecraft details */
+  spacecraft?: {
+    name: string;
+    type: string;
+    manufacturer: string;
+    massKg: number;
+    powerSource: string;
+  };
+  /** Crew details */
+  crew?: {
+    isCrewed: boolean;
+    members?: {
+      name: string;
+      role: string;
+      nationality: string;
+      _id: string;
+    }[];
+  };
+  /** Mission payloads */
+  payloads?: {
+    name: string;
+    type: string;
+    purpose: string;
+  }[];
+  /** Orbit details */
+  orbitDetails?: {
+    orbitType: string;
+    apoapsisKm: number;
+    periapsisKm: number;
+    inclinationDeg: number;
+  };
+  /** Budget details */
+  budget?: {
+    amount: number;
+    currency: string;
+  };
 }
 
 // The external API base URL is no longer needed here as requests will be proxied

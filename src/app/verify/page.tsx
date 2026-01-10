@@ -20,7 +20,7 @@ import { useAuth } from '@/context/auth-context';
 function VerifyPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setToken } = useAuth(); // Use auth context
+  const { setToken, user } = useAuth(); // Use auth context
 
   const [otp, setOtp] = useState('');
   const [email, setEmail] = useState('');
@@ -46,6 +46,14 @@ function VerifyPageContent() {
       router.push('/login');
     }
   }, [searchParams, router]);
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user?.username) {
+      router.replace(`/profile/${user.username}`);
+    }
+  }, [user, router]);
+
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +83,7 @@ function VerifyPageContent() {
           console.warn("could not remove email from localstorage")
         }
         
-        router.replace('/'); // The AuthContext will handle fetching the user and redirecting
+        // The AuthContext and useEffect will handle fetching the user and redirecting
       } else {
         toast.error(data.msg || "Invalid or expired OTP. Please try again.", { id: loadingToast });
       }

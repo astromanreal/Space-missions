@@ -21,6 +21,13 @@ interface UserListDialogProps {
 }
 
 export function UserListDialog({ title, users, trigger }: UserListDialogProps) {
+  // Filter out duplicate users to prevent key errors
+  const uniqueUsers = users.filter((user, index, self) =>
+    index === self.findIndex((u) => (
+      u._id === user._id
+    ))
+  );
+
   return (
     <Dialog>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -30,8 +37,8 @@ export function UserListDialog({ title, users, trigger }: UserListDialogProps) {
         </DialogHeader>
         <ScrollArea className="max-h-[60vh]">
           <div className="space-y-4 pr-6">
-            {users.length > 0 ? (
-              users.map(user => (
+            {uniqueUsers.length > 0 ? (
+              uniqueUsers.map(user => (
                 <div key={user._id} className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <Avatar>
@@ -59,3 +66,4 @@ export function UserListDialog({ title, users, trigger }: UserListDialogProps) {
 }
 
     
+

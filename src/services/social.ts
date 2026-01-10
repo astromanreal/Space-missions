@@ -10,6 +10,7 @@ export interface User {
     name?: string;
     email: string;
     bio?: string;
+    role?: 'user' | 'admin'; // Add role field
     createdAt: string;
     updatedAt: string;
     trackedMissions?: Partial<SpaceMission>[]; // Missions can be partial for summary views

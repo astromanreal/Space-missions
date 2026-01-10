@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from "react";
@@ -34,12 +35,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { login, user } = useAuth(); // Use the auth context
 
-  // Redirect if user is already logged in
-  useEffect(() => {
-    if (user) {
-      router.replace('/');
-    }
-  }, [user, router]);
+  // Redirect if user is already logged in, handled by AuthProvider now
 
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -50,8 +46,7 @@ export default function LoginPage() {
     try {
       await login(loginEmail, loginPassword);
       toast.success('Login successful! Redirecting...', { id: loadingToast });
-      // The context will handle redirects after successful login and profile fetch
-      // No need for router.push here if context handles it
+      // The auth context's useEffect will now handle redirecting to the profile page
     } catch (error: any) {
       toast.error(error.message || "Invalid email or password.", { id: loadingToast });
     } finally {

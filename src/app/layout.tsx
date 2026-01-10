@@ -6,7 +6,7 @@ import { GeistSans } from 'geist/font/sans';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import Link from 'next/link';
-import { Rocket, User, Settings, Compass, Milestone, Activity, Hourglass, Menu, LogIn, X, ChevronDown, LogOut, Github, Instagram } from 'lucide-react';
+import { Rocket, User, Settings, Compass, Menu, LogIn, X, LogOut, Github, Instagram, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { SettingsProvider, useSettings } from '@/context/settings-context';
@@ -125,31 +125,6 @@ function Header() {
             <Link href="/explore" className="transition-colors hover:text-primary text-foreground/80 flex items-center gap-1.5">
               <Compass className="h-4 w-4" /> Explore
             </Link>
-
-             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                 <Button variant="ghost" className="transition-colors hover:text-primary text-foreground/80 flex items-center gap-1.5 px-0 hover:bg-transparent">
-                  Browse <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem asChild>
-                   <Link href="/explore-by-type" className="flex items-center gap-1.5 w-full">
-                     <Milestone className="h-4 w-4" /> Mission Types
-                   </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                   <Link href="/explore?filter=active" className="flex items-center gap-1.5 w-full">
-                     <Activity className="h-4 w-4" /> Active Missions
-                   </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                   <Link href="/explore?filter=future" className="flex items-center gap-1.5 w-full">
-                     <Hourglass className="h-4 w-4" /> Future Missions
-                   </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </nav>
 
           <div className="flex items-center gap-2 ml-auto">
@@ -167,6 +142,14 @@ function Header() {
                       <DropdownMenuContent align="end">
                          <DropdownMenuLabel>My Account</DropdownMenuLabel>
                          <DropdownMenuSeparator />
+                         {user.role === 'admin' && (
+                          <DropdownMenuItem asChild>
+                            <Link href="/admin/dashboard">
+                              <ShieldCheck className="mr-2 h-4 w-4" />
+                              <span>Admin Dashboard</span>
+                            </Link>
+                          </DropdownMenuItem>
+                         )}
                          <DropdownMenuItem asChild>
                             <Link href="/profile">
                                <User className="mr-2 h-4 w-4" />
@@ -226,6 +209,11 @@ function Header() {
                     </Avatar>
                     My Profile
                  </Link>
+                 {user.role === 'admin' && (
+                    <Link href="/admin/dashboard" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
+                      <ShieldCheck className="h-5 w-5 text-accent" /> Admin Dashboard
+                    </Link>
+                 )}
                  <Link href="/settings" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
                     <Settings className="h-5 w-5 text-accent" /> Settings
                  </Link>
@@ -237,15 +225,6 @@ function Header() {
             )}
             <Link href="/explore" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
                 <Compass className="h-5 w-5 text-accent" /> Explore All
-            </Link>
-             <Link href="/explore-by-type" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
-                <Milestone className="h-5 w-5 text-accent" /> Mission Types
-            </Link>
-             <Link href="/explore?filter=active" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
-                <Activity className="h-5 w-5 text-accent" /> Active Missions
-            </Link>
-             <Link href="/explore?filter=future" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
-                <Hourglass className="h-5 w-5 text-accent" /> Future Missions
             </Link>
             {user && (
               <Button variant="destructive" className="mt-8" onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}>

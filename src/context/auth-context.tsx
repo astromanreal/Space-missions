@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { User } from '@/services/social';
 import toast from 'react-hot-toast';
 import { SpaceMission } from '@/services/space-missions';
@@ -33,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setTokenState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   // Load token from localStorage on initial mount
   useEffect(() => {
@@ -127,6 +128,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw error;
     }
   }, []);
+
+  // After user is fetched, handle redirects
+  useEffect(() => {
+    if (!isLoading && user?.username && (pathname === '/login' || pathname === '/register')) {
+        router.replace(`/profile/${user.username}`);
+    }
+  }, [user, isLoading, router, pathname]);
 
   const setToken = (newToken: string) => {
     setTokenState(newToken);
