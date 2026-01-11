@@ -50,7 +50,7 @@ export function ReviewUpdateDialog({ update, open, onOpenChange, onUpdateStatus 
                         </div>
                     </div>
                 </DialogHeader>
-                <div className="py-4 space-y-4">
+                <div className="py-4 space-y-6">
                     <div>
                         <h3 className="font-semibold mb-2">For Mission</h3>
                         <Link href={`/missions/${update.mission.slug}`}>
@@ -59,16 +59,31 @@ export function ReviewUpdateDialog({ update, open, onOpenChange, onUpdateStatus 
                     </div>
                     <div>
                         <h3 className="font-semibold mb-2">Content</h3>
-                        <div className="prose prose-sm dark:prose-invert max-w-none p-4 border rounded-md bg-muted/50 h-64 overflow-y-auto">
+                        <div className="prose prose-sm dark:prose-invert max-w-none p-4 border rounded-md bg-muted/50 h-48 overflow-y-auto">
                             <p>{update.content}</p>
                         </div>
                     </div>
+                    <div>
+                        <h3 className="font-semibold mb-2">Official Source</h3>
+                        <a
+                            href={update.referenceLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline break-all text-sm"
+                        >
+                            {update.referenceLink}
+                        </a>
+                    </div>
                 </div>
                 <DialogFooter className="gap-2 sm:gap-0">
+                    <DialogClose asChild>
+                        <Button type="button" variant="secondary">Cancel</Button>
+                    </DialogClose>
                     <Button type="button" variant="destructive" onClick={() => onUpdateStatus(update._id, 'rejected')}>
                         <X className="mr-2 h-4 w-4" /> Reject
                     </Button>
                     <Button type="button" variant="default" onClick={() => onUpdateStatus(update._id, 'approved')}>
+
                         <Check className="mr-2 h-4 w-4" /> Approve
                     </Button>
                 </DialogFooter>

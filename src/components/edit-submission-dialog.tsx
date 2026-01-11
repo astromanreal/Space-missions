@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -18,34 +18,50 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from '@/context/auth-context';
 import toast from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
+import { MissionUpdate } from '@/services/updates';
 
-interface ContributeUpdateDialogProps {
-  missionSlug: string;
+interface EditSubmissionDialogProps {
+  update: MissionUpdate;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdateSubmitted: () => void;
+  onUpdate: (updatedSubmission: MissionUpdate) => void;
 }
 
-export function ContributeUpdateDialog({ missionSlug, open, onOpenChange, onUpdateSubmitted }: ContributeUpdateDialogProps) {
+export function EditSubmissionDialog({ update, open, onOpenChange, onUpdate }: EditSubmissionDialogProps) {
   const { token } = useAuth();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [referenceLink, setReferenceLink] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    if (update) {
+      setTitle(update.title);
+      setContent(update.content);
+      setReferenceLink(update.referenceLink);
+    }
+  }, [update]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) {
-      toast.error("You must be logged in to contribute.");
+    if (!token || !update) {
+      toast.error("Authentication or data error.");
       return;
     }
     
     setIsLoading(true);
-    const loadingToast = toast.loading("Submitting your update...");
+    const loadingToast = toast.loading("Saving changes...");
+
+    if (!update.mission || !update.mission.slug) {
+        toast.error("Cannot save: Mission data is missing or incomplete.", { id: loadingToast });
+        setIsLoading(false);
+        onOpenChange(false);
+        return;
+    }
 
     try {
-      const response = await fetch(`/api/v1/missions/${missionSlug}/updates`, {
-        method: 'POST',
+      const response = await fetch(`/api/v1/missions/${update.mission.slug}/updates/${update._id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -53,17 +69,26 @@ export function ContributeUpdateDialog({ missionSlug, open, onOpenChange, onUpda
         body: JSON.stringify({ title, content, referenceLink }),
       });
 
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.indexOf('application/json') !== -1) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to save changes.');
+        } else {
+            const textError = await response.text();
+            console.error("Non-JSON error response:", textError);
+            throw new Error('Received an unexpected response from the server when saving changes.');
+        }
+      }
+
       const data = await response.json();
 
-      if (response.ok) {
-        toast.success("Update submitted for review!", { id: loadingToast });
-        setTitle('');
-        setContent('');
-        setReferenceLink('');
+      if (data.success) {
+        toast.success("Update saved!", { id: loadingToast });
+        onUpdate(data.data);
         onOpenChange(false);
-        onUpdateSubmitted();
       } else {
-        throw new Error(data.error || "Failed to submit update.");
+        throw new Error(data.error || "Failed to save changes.");
       }
     } catch (error: any) {
       toast.error(error.message, { id: loadingToast });
@@ -77,9 +102,9 @@ export function ContributeUpdateDialog({ missionSlug, open, onOpenChange, onUpda
       <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Contribute an Update</DialogTitle>
+            <DialogTitle>Edit Submission</DialogTitle>
             <DialogDescription>
-              Share a new finding, article, or piece of news about this mission. Your submission will be reviewed by an administrator before being published.
+              Modify the details of your contribution for the mission: <span className="font-semibold text-foreground">{update?.mission.missionName}</span>
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -117,9 +142,6 @@ export function ContributeUpdateDialog({ missionSlug, open, onOpenChange, onUpda
                     disabled={isLoading}
                     required
                 />
-                 <p className="text-sm text-muted-foreground mt-1">
-                    A link to an official article or press release for this update.
-                </p>
             </div>
           </div>
           <DialogFooter>
@@ -130,7 +152,7 @@ export function ContributeUpdateDialog({ missionSlug, open, onOpenChange, onUpda
             </DialogClose>
             <Button type="submit" disabled={isLoading}>
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Submit for Review
+              Save Changes
             </Button>
           </DialogFooter>
         </form>

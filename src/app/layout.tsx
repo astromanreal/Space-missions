@@ -6,7 +6,7 @@ import { GeistSans } from 'geist/font/sans';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import Link from 'next/link';
-import { Rocket, User, Settings, Compass, Menu, LogIn, X, LogOut, Github, Instagram, ShieldCheck } from 'lucide-react';
+import { Rocket, User, Settings, Compass, Menu, LogIn, X, LogOut, Github, Instagram, ShieldCheck, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { SettingsProvider, useSettings } from '@/context/settings-context';
@@ -157,6 +157,12 @@ function Header() {
                             </Link>
                          </DropdownMenuItem>
                          <DropdownMenuItem asChild>
+                            <Link href="/my-contributions">
+                               <FileText className="mr-2 h-4 w-4" />
+                               <span>My Contributions</span>
+                            </Link>
+                         </DropdownMenuItem>
+                         <DropdownMenuItem asChild>
                             <Link href="/settings">
                                 <Settings className="mr-2 h-4 w-4" />
                                 <span>Settings</span>
@@ -214,6 +220,9 @@ function Header() {
                       <ShieldCheck className="h-5 w-5 text-accent" /> Admin Dashboard
                     </Link>
                  )}
+                 <Link href="/my-contributions" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
+                    <FileText className="h-5 w-5 text-accent" /> My Contributions
+                 </Link>
                  <Link href="/settings" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
                     <Settings className="h-5 w-5 text-accent" /> Settings
                  </Link>
@@ -265,3 +274,5 @@ function Footer() {
     </footer>
   );
 }
+
+    

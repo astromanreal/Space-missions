@@ -345,13 +345,13 @@ export default function MissionDetailPage() {
           </div>
           {isUpdatesLoading ? (
             <div className="space-y-4">
-                <Skeleton className="h-32 w-full" />
-                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
             </div>
           ) : updates.length > 0 ? (
              <div className="space-y-4">
                 {updates.map(update => (
-                    <MissionUpdateCard key={update._id} update={update} />
+                    <MissionUpdateCard key={update._id} update={update} missionSlug={slug} />
                 ))}
              </div>
           ) : (
