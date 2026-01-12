@@ -4,24 +4,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import MissionCard from '@/components/mission-card';
 import { SpaceMission } from '@/services/space-missions';
-import { useSettings } from '@/context/settings-context';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
-import { Search, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal } from 'lucide-react';
 import MissionFilters, { FilterState } from '@/components/mission-filters';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
 import { cn } from '@/lib/utils';
 
-export default function ExplorePage() {
-  const { cardSize, showCardImages } = useSettings(); 
+const GRID_CLASS = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
 
+export default function ExplorePage() {
   const [missions, setMissions] = useState<SpaceMission[]>([]);
   const [totalMissions, setTotalMissions] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,12 +28,8 @@ export default function ExplorePage() {
     missionType: '',
     sort: '-launchDate',
   });
-  const [page, setPage] = useState(1);
-  const limit = cardSize === 'small' ? 20 : 9;
 
-  const totalPages = Math.ceil(totalMissions / limit);
-
-  const fetchMissions = useCallback(async (currentFilters: FilterState, currentPage: number) => {
+  const fetchMissions = useCallback(async (currentFilters: FilterState) => {
     setIsLoading(true);
     
     const params = new URLSearchParams();
@@ -51,8 +40,7 @@ export default function ExplorePage() {
     if (currentFilters.category) params.append('category', currentFilters.category);
     if (currentFilters.missionType) params.append('missionType', currentFilters.missionType);
     if (currentFilters.sort) params.append('sort', currentFilters.sort);
-    params.append('page', currentPage.toString());
-    params.append('limit', limit.toString());
+    // Removed page and limit to fetch all missions
 
     try {
       const response = await fetch(`/api/v1/missions?${params.toString()}`);
@@ -70,23 +58,18 @@ export default function ExplorePage() {
     } finally {
       setIsLoading(false);
     }
-  }, [limit]);
+  }, []);
   
   useEffect(() => {
     const handler = setTimeout(() => {
-      fetchMissions(filters, page);
+      fetchMissions(filters);
     }, 300); // Debounce search
     return () => clearTimeout(handler);
-  }, [filters, page, fetchMissions]);
+  }, [filters, fetchMissions]);
   
   const handleFilterChange = (newFilters: FilterState) => {
-    setPage(1);
     setFilters(newFilters);
   };
-  
-  const gridClass = cardSize === 'small'
-    ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'
-    : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
 
   return (
     <div className="space-y-8">
@@ -131,17 +114,18 @@ export default function ExplorePage() {
       </div>
 
       {isLoading ? (
-        <div className={gridClass}>
-          {[...Array(limit)].map((_, i) => (
+        <div className={GRID_CLASS}>
+          {[...Array(12)].map((_, i) => (
             <Card key={i} className="flex flex-col overflow-hidden h-full">
+              <Skeleton className="aspect-[16/10] w-full" />
               <CardHeader className="p-4">
-                {showCardImages && <Skeleton className="aspect-[4/3] w-full mb-4 rounded-md" />}
-                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-6 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
               </CardHeader>
-              <CardContent className="p-4 pt-0 space-y-3 flex-grow">
-                <Skeleton className="h-4 w-full" />
-                {cardSize === 'large' && <Skeleton className="h-4 w-full" />}
+              <CardContent className="flex-grow p-4 pt-0 space-y-3">
+                 <Skeleton className="h-5 w-full" />
+                 <Skeleton className="h-5 w-4/5" />
+                 <Skeleton className="h-5 w-3/4" />
               </CardContent>
               <CardFooter className="p-4 border-t border-border/50">
                 <Skeleton className="h-10 w-full" />
@@ -150,13 +134,11 @@ export default function ExplorePage() {
           ))}
         </div>
       ) : missions.length > 0 ? (
-        <div className={gridClass}>
+        <div className={GRID_CLASS}>
           {missions.map((mission) => (
             <MissionCard
                 key={mission._id}
                 mission={mission}
-                cardSize={cardSize}
-                showImage={showCardImages}
             />
           ))}
         </div>
@@ -165,30 +147,6 @@ export default function ExplorePage() {
           <Search className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-xl font-semibold">No Missions Found</h3>
           <p className="text-muted-foreground">Try adjusting your search or filter criteria.</p>
-        </div>
-      )}
-
-      {!isLoading && totalPages > 1 && (
-        <div className="flex items-center justify-center space-x-4 pt-8">
-            <Button
-                variant="outline"
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-            >
-                <ChevronLeft className="h-4 w-4 mr-2" />
-                Previous
-            </Button>
-            <span className="text-muted-foreground text-sm">
-                Page {page} of {totalPages}
-            </span>
-            <Button
-                variant="outline"
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-            >
-                Next
-                <ChevronRight className="h-4 w-4 ml-2" />
-            </Button>
         </div>
       )}
     </div>

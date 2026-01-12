@@ -9,8 +9,6 @@ type ColorScheme = 'galaxy' | 'nebula' | 'solar-flare' | 'supernova';
 // Define the shape of the settings
 interface SettingsState {
   fontSizeScale: number;
-  showCardImages: boolean;
-  cardSize: 'small' | 'large';
   theme: Theme;
   colorScheme: ColorScheme;
 }
@@ -18,24 +16,18 @@ interface SettingsState {
 // Define the shape of the context value
 interface SettingsContextProps extends SettingsState {
   setFontSizeScale: Dispatch<SetStateAction<number>>;
-  setShowCardImages: Dispatch<SetStateAction<boolean>>;
-  setCardSize: Dispatch<SetStateAction<'small' | 'large'>>;
   setTheme: Dispatch<SetStateAction<Theme>>;
   setColorScheme: Dispatch<SetStateAction<ColorScheme>>;
 }
 
 // Local storage keys
 const FONT_SIZE_LS_KEY = 'fontSizeScale';
-const CARD_IMAGES_LS_KEY = 'showCardImages';
-const CARD_SIZE_LS_KEY = 'cardSize';
 const THEME_LS_KEY = 'theme';
 const COLOR_SCHEME_LS_KEY = 'colorScheme';
 
 
 // Default values
 const DEFAULT_FONT_SIZE_SCALE = 1;
-const DEFAULT_SHOW_CARD_IMAGES = true;
-const DEFAULT_CARD_SIZE = 'small';
 const DEFAULT_THEME: Theme = 'dark';
 const DEFAULT_COLOR_SCHEME: ColorScheme = 'galaxy';
 
@@ -46,8 +38,6 @@ const SettingsContext = createContext<SettingsContextProps | undefined>(undefine
 // Create the provider component
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [fontSizeScale, setFontSizeScale] = useState<number>(DEFAULT_FONT_SIZE_SCALE);
-  const [showCardImages, setShowCardImages] = useState<boolean>(DEFAULT_SHOW_CARD_IMAGES);
-  const [cardSize, setCardSize] = useState<'small' | 'large'>(DEFAULT_CARD_SIZE);
   const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
   const [colorScheme, setColorScheme] = useState<ColorScheme>(DEFAULT_COLOR_SCHEME);
   const [isMounted, setIsMounted] = useState(false);
@@ -61,12 +51,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         const parsedScale = parseFloat(storedScale);
         if (!isNaN(parsedScale)) setFontSizeScale(Math.max(0.8, Math.min(1.3, parsedScale)));
       }
-
-      const storedShowImages = localStorage.getItem(CARD_IMAGES_LS_KEY);
-      if (storedShowImages !== null) setShowCardImages(storedShowImages === 'true');
-
-      const storedCardSize = localStorage.getItem(CARD_SIZE_LS_KEY);
-      if (storedCardSize === 'small' || storedCardSize === 'large') setCardSize(storedCardSize);
       
       const storedTheme = localStorage.getItem(THEME_LS_KEY) as Theme | null;
       if (storedTheme) setTheme(storedTheme);
@@ -87,16 +71,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }
   }, [fontSizeScale, isMounted]);
 
-  // Effect for card images
-  useEffect(() => {
-    if (isMounted) localStorage.setItem(CARD_IMAGES_LS_KEY, showCardImages.toString());
-  }, [showCardImages, isMounted]);
-
-  // Effect for card size
-  useEffect(() => {
-    if (isMounted) localStorage.setItem(CARD_SIZE_LS_KEY, cardSize);
-  }, [cardSize, isMounted]);
-  
   // Effect for theme (light/dark/system)
   useEffect(() => {
     if (isMounted) {
@@ -115,10 +89,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const value = {
     fontSizeScale,
     setFontSizeScale,
-    showCardImages,
-    setShowCardImages,
-    cardSize,
-    setCardSize,
     theme,
     setTheme,
     colorScheme,

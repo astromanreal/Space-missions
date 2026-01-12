@@ -5,118 +5,94 @@ import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Tag, CheckCircle, Clock, MapPin, Target, Cpu, ExternalLink } from 'lucide-react';
+import { Calendar, Tag, Target, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MissionCardProps {
   mission: SpaceMission;
-  cardSize: 'small' | 'large'; // Accept card size setting
-  showImage: boolean; // Accept image visibility setting
 }
 
-// Function to determine badge variant based on status
 const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
   if (!status) return 'outline';
   switch (status.toLowerCase()) {
     case 'active':
     case 'ongoing':
-      return 'default'; // Use primary color (Neon Blue in dark theme)
+      return 'default';
     case 'completed':
-      return 'secondary'; // Use secondary color (Purple in dark theme)
+      return 'secondary';
     case 'planned':
     case 'upcoming':
       return 'outline';
     case 'failed':
-        return 'destructive';
+      return 'destructive';
     default:
       return 'outline';
   }
 };
 
-export default function MissionCard({ mission, cardSize, showImage }: MissionCardProps) {
+export default function MissionCard({ mission }: MissionCardProps) {
   const {
     missionName,
     launch,
     agency,
     missionType,
     status,
-    target,
-    objectives,
+    destination,
     image,
-    slug, // Use the new slug for the link
+    slug,
   } = mission;
 
   const launchYear = launch.launchDate ? new Date(launch.launchDate).getFullYear() : 'N/A';
 
-
   return (
     <Card className={cn(
-        "flex flex-col overflow-hidden h-full transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-1 bg-card/80 backdrop-blur-sm border border-border/50",
+        "group flex flex-col overflow-hidden h-full transition-all duration-300 ease-in-out hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-1 bg-card/80 backdrop-blur-sm border border-border/50",
     )}>
-      <CardHeader className={cn("p-3", cardSize === 'small' ? 'pb-2' : 'p-4')}>
-        {/* Conditionally render image based on showImage prop */}
-        {showImage && image && (
-          <div className="relative aspect-[4/3] w-full mb-3 rounded-md overflow-hidden">
+      {image && (
+        <div className="relative aspect-[16/10] w-full overflow-hidden">
             <Image
-              src={image} // Use the direct image URL from mission data
-              alt={`Image of ${missionName} mission`}
-              layout="fill"
-              objectFit="cover"
-              className="transition-transform duration-300 group-hover:scale-105"
-              data-ai-hint={`${target} ${missionType} space mission`}
-              sizes={cardSize === 'small' ? '(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 300px' : '(max-width: 768px) 90vw, (max-width: 1280px) 45vw, 400px'} // Optimize image loading
+                src={image}
+                alt={`Image of ${missionName} mission`}
+                fill
+                style={{objectFit: "cover"}}
+                className="transition-transform duration-300 group-hover:scale-105"
+                data-ai-hint={`${destination} ${missionType} space mission`}
+                sizes="(max-width: 768px) 90vw, (max-width: 1280px) 45vw, 400px"
             />
-            <Badge
-              variant={getStatusVariant(status)}
-              className="absolute top-1.5 right-1.5 z-10 backdrop-blur-sm bg-opacity-80 text-xs px-1.5 py-0.5" // Smaller badge for all sizes
-            >
-              {status}
-            </Badge>
+            <div className="absolute top-0 right-0 p-2">
+                 <Badge
+                    variant={getStatusVariant(status)}
+                    className="backdrop-blur-sm bg-opacity-80 text-xs px-2 py-1"
+                >
+                    {status}
+                </Badge>
+            </div>
+        </div>
+      )}
+      
+      <CardHeader className="p-4 flex-shrink-0">
+        <CardTitle className="text-lg font-bold">{missionName}</CardTitle>
+        <CardDescription className="text-sm text-muted-foreground">{agency.name}</CardDescription>
+      </CardHeader>
+      
+      <CardContent className="flex-grow flex-shrink-0 px-4 pb-4 space-y-3">
+        <div className="flex items-center text-sm text-muted-foreground">
+            <Calendar className="mr-2 h-4 w-4" /> <span>{launchYear}</span>
+        </div>
+        <div className="flex items-center text-sm text-muted-foreground">
+            <Tag className="mr-2 h-4 w-4" /> <span>{missionType}</span>
+        </div>
+        {destination && (
+          <div className="flex items-center text-sm text-muted-foreground">
+              <Target className="mr-2 h-4 w-4" /> <span>{destination}</span>
           </div>
         )}
-        <CardTitle className={cn("font-semibold", cardSize === 'small' ? 'text-base' : 'text-xl')}>{missionName}</CardTitle>
-         <CardDescription className={cn("text-muted-foreground", cardSize === 'small' ? 'text-xs' : 'text-sm')}>{agency.name}</CardDescription>
-      </CardHeader>
+      </CardContent>
 
-       {/* Conditionally render detailed content for large cards */}
-       {cardSize === 'large' && (
-        <CardContent className="p-4 pt-0 space-y-3 flex-grow">
-           <div className="flex items-center text-sm text-muted-foreground">
-             <Calendar className="mr-1.5 h-3.5 w-3.5" /> Launch Year: {launchYear}
-           </div>
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Tag className="mr-1.5 h-3.5 w-3.5" /> Type: {missionType}
-          </div>
-           <div className="flex items-center text-sm text-muted-foreground">
-             <Target className="mr-1.5 h-3.5 w-3.5" /> Target: {target}
-           </div>
-            {objectives && objectives.length > 0 && (
-            <p className="text-sm line-clamp-2">
-               <span className="font-medium text-foreground/80">Objective:</span> {objectives[0]}
-            </p>
-            )}
-         </CardContent>
-       )}
-
-        {/* Minimal content for small cards or if large card content is hidden */}
-        {cardSize === 'small' && (
-             <CardContent className="p-3 pt-0 flex-grow">
-                 <div className="flex items-center text-xs text-muted-foreground">
-                     <Calendar className="mr-1 h-3 w-3" /> {launchYear}
-                     <span className="mx-1">|</span>
-                     <Tag className="mr-1 h-3 w-3" /> {missionType}
-                 </div>
-                 <div className="flex items-center text-xs text-muted-foreground mt-1">
-                     <Target className="mr-1 h-3 w-3" /> {target}
-                 </div>
-             </CardContent>
-         )}
-
-
-      <CardFooter className={cn("border-t border-border/50", cardSize === 'small' ? 'p-2' : 'p-4')}>
+      <CardFooter className="mt-auto border-t border-border/50 flex-shrink-0 p-4">
         <Link href={`/missions/${slug}`} className="w-full">
-          <Button variant="outline" className={cn("w-full glow-on-hover border-primary/50 hover:bg-primary/10 hover:text-primary", cardSize === 'small' ? 'h-8 text-xs px-2' : 'h-10')}>
-            View Details
+          <Button variant="outline" className="w-full glow-on-hover border-primary/50 hover:bg-primary/10 hover:text-primary h-10">
+            View Details <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>
       </CardFooter>
