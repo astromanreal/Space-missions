@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -16,6 +15,7 @@ import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CommentSection } from '@/components/comment-section';
 import LikeButton from '@/components/like-button';
+import { User as UserType } from '@/services/social';
 
 export default function UpdateDetailPage() {
   const params = useParams();
@@ -24,6 +24,7 @@ export default function UpdateDetailPage() {
   
   const [update, setUpdate] = useState<MissionUpdate | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [commentCount, setCommentCount] = useState(0);
 
   const fetchUpdate = useCallback(async () => {
     if (!updateId) return;
@@ -53,11 +54,15 @@ export default function UpdateDetailPage() {
     fetchUpdate();
   }, [fetchUpdate]);
 
-  const handleLikeUpdate = (newLikes: string[]) => {
+  const handleLikeUpdate = (newLikes: Partial<UserType>[]) => {
     if (update) {
         setUpdate({ ...update, likes: newLikes });
     }
   };
+
+   const handleCommentCountChange = useCallback((count: number) => {
+    setCommentCount(count);
+  }, []);
 
   if (isLoading || isAuthLoading) {
     return (
@@ -74,11 +79,14 @@ export default function UpdateDetailPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Back to Mission Link */}
-      <Button variant="outline" asChild>
-        <Link href={`/missions/${update.mission.slug}`}>
-          &larr; Back to {update.mission.missionName}
-        </Link>
-      </Button>
+      {update.mission?.slug && (
+        <Button variant="outline" asChild>
+            <Link href={`/missions/${update.mission.slug}`}>
+            &larr; Back to {update.mission.missionName}
+            </Link>
+        </Button>
+      )}
+
 
       {/* Main Update Card */}
       <Card className="bg-card/80 backdrop-blur-sm border-border/50">
@@ -117,7 +125,7 @@ export default function UpdateDetailPage() {
              <div className="flex items-center gap-4">
                 <LikeButton 
                     updateId={update._id}
-                    initialLikes={update.likes}
+                    likes={update.likes}
                     onLikeUpdate={handleLikeUpdate}
                 />
             </div>
@@ -127,7 +135,7 @@ export default function UpdateDetailPage() {
       <Separator />
 
       {/* Comments Section */}
-      <CommentSection updateId={update._id} />
+      <CommentSection updateId={update._id} onCommentCountChange={handleCommentCountChange} />
     </div>
   );
 }

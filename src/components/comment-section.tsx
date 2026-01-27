@@ -102,7 +102,7 @@ export function CommentSection({ updateId, onCommentCountChange }: CommentSectio
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold flex items-center gap-3"><MessageSquare /> Comments</h2>
+      <h3 className="text-lg font-semibold flex items-center gap-3"><MessageSquare className="h-5 w-5" /> Comments</h3>
       
       {user && (
         <div className="space-y-2">
@@ -127,7 +127,7 @@ export function CommentSection({ updateId, onCommentCountChange }: CommentSectio
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : comments.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-6">
             {comments.map(comment => (
                 <CommentCard 
                     key={comment._id} 
@@ -140,10 +140,10 @@ export function CommentSection({ updateId, onCommentCountChange }: CommentSectio
             ))}
         </div>
       ) : (
-        <div className="text-center py-12 border-2 border-dashed rounded-lg bg-card/50">
-            <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold">No Comments Yet</h3>
-            <p className="text-muted-foreground">Be the first to share your thoughts!</p>
+        <div className="text-center py-8">
+            <MessageSquare className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
+            <h4 className="text-md font-semibold">No Comments Yet</h4>
+            <p className="text-sm text-muted-foreground">Be the first to share your thoughts!</p>
         </div>
       )}
     </div>

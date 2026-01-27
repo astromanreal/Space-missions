@@ -39,7 +39,7 @@ export function CommentCard({ updateId, comment, onCommentDeleted, onReplyAdded,
     const [isPostingReply, setIsPostingReply] = useState(false);
 
     const timeAgo = formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true });
-    const canDelete = user?._id === comment.author._id;
+    const canDelete = user?.role === 'admin' || user?._id === comment.author._id;
 
     const handleDelete = async () => {
         if (!token) return;
@@ -117,7 +117,7 @@ export function CommentCard({ updateId, comment, onCommentDeleted, onReplyAdded,
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
+                                <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Continue</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
@@ -146,7 +146,7 @@ export function CommentCard({ updateId, comment, onCommentDeleted, onReplyAdded,
                 )}
                 
                 {comment.replies && comment.replies.length > 0 && (
-                    <div className="pt-4 space-y-4 border-l border-border/50 pl-4">
+                    <div className="pt-4 space-y-4 border-l border-border/50 pl-4 mt-4">
                         {comment.replies.map(reply => (
                              <CommentCard 
                                 key={reply._id} 

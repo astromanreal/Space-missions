@@ -13,6 +13,6 @@ export interface MissionUpdate {
     mission: Partial<SpaceMission>;
     author: Partial<User>;
     createdAt: string;
-    likes: string[]; // Array of User IDs
+    likes: Partial<User>[]; // Array of User Objects
     comments: Comment[];
 }

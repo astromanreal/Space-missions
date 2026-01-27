@@ -6,7 +6,7 @@ import { GeistSans } from 'geist/font/sans';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import Link from 'next/link';
-import { Rocket, User, Settings, Compass, Menu, LogIn, X, LogOut, Github, Instagram, ShieldCheck, FileText } from 'lucide-react';
+import { Rocket, User, Settings, Compass, Menu, LogIn, X, LogOut, Github, Instagram, ShieldCheck, FileText, Rss } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { SettingsProvider, useSettings } from '@/context/settings-context';
@@ -125,6 +125,9 @@ function Header() {
             <Link href="/explore" className="transition-colors hover:text-primary text-foreground/80 flex items-center gap-1.5">
               <Compass className="h-4 w-4" /> Explore
             </Link>
+             <Link href="/feed" className="transition-colors hover:text-primary text-foreground/80 flex items-center gap-1.5">
+              <Rss className="h-4 w-4" /> Feed
+            </Link>
           </nav>
 
           <div className="flex items-center gap-2 ml-auto">
@@ -227,6 +230,9 @@ function Header() {
                   <LogIn className="h-6 w-6 text-primary" /> Join The Exploration
               </Link>
             )}
+             <Link href="/feed" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
+                <Rss className="h-5 w-5 text-accent" /> Feed
+            </Link>
             <Link href="/explore" className="text-xl p-3 rounded-lg hover:bg-muted transition-colors flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
                 <Compass className="h-5 w-5 text-accent" /> Explore All
             </Link>
@@ -269,5 +275,3 @@ function Footer() {
     </footer>
   );
 }
-
-    
